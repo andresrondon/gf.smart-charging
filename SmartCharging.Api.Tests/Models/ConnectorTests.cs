@@ -1,24 +1,23 @@
 ﻿using SmartCharging.Api.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace SmartCharging.Api.Tests.Models
+namespace SmartCharging.Api.Tests.Models;
+
+public class ConnectorTests
 {
-    public class ConnectorTests
+    [Fact]
+    public void ThrowsValidationExceptionWhenZeroOrNegativeMaxCurrent()
     {
-        [Fact]
-        public void ThrowsValidationExceptionWhenZeroOrNegativeMaxCurrent()
+        var connector = new Connector
         {
-            var connector = new Connector
-            {
-                Id = 1,
-                MaxCurrentInAmps = 0
-            };
+            Id = 1,
+            MaxCurrentInAmps = 0
+        };
 
-            Assert.Throws<ValidationException>(() =>
-            {
-                Validator.ValidateObject(connector, new ValidationContext(connector), true);
-            });
-        }
-
+        Assert.Throws<ValidationException>(() =>
+        {
+            Validator.ValidateObject(connector, new ValidationContext(connector), true);
+        });
     }
+
 }

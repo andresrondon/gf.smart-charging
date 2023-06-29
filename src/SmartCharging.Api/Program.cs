@@ -1,9 +1,10 @@
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.Azure.Cosmos;
 
 // New instance of CosmosClient class
 using CosmosClient client = new(
-    accountEndpoint: Environment.GetEnvironmentVariable("COSMOS_ENDPOINT")!,
-    authKeyOrResourceToken: Environment.GetEnvironmentVariable("COSMOS_KEY")!
+    accountEndpoint: "https://gfsc-65527120.documents.azure.com:443/",
+    authKeyOrResourceToken: "dOSnlnRnwT3QQzp7JAg9ijU9lntpoax7wm1v135EVluWtL77cLWUhL0ssXRZ2dXLJWngYIe7BC0oACDbgeYlqw=="
 );
 
 // Database reference with creation if it does not already exist
@@ -28,6 +29,18 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddApiVersioning(o =>
+{
+    o.AssumeDefaultVersionWhenUnspecified = true;
+    o.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1, 0);
+    o.ReportApiVersions = true;
+    o.ApiVersionReader = ApiVersionReader.Combine(
+        new QueryStringApiVersionReader("api-version"),
+        new HeaderApiVersionReader("X-Version"),
+        new MediaTypeApiVersionReader("ver"));
+
+});
 
 var app = builder.Build();
 
