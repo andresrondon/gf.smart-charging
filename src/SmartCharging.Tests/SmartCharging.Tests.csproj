@@ -27,7 +27,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\SmartCharging.Api\SmartCharging.Api.csproj" />
+    <ProjectReference Include="..\SmartCharging.Api\SmartCharging.Api.csproj" />
+    <ProjectReference Include="..\SmartCharging.Lib\SmartCharging.Lib.csproj" />
   </ItemGroup>
 
 </Project>
