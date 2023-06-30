@@ -1,4 +1,4 @@
-﻿using SmartCharging.Api.Models;
+﻿using SmartCharging.Lib.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace SmartCharging.Api.Tests.Models

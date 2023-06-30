@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using SmartCharging.Api.Models;
+using SmartCharging.Lib.Models;
 using SmartCharging.Api.Models.Requests;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;

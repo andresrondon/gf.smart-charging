@@ -17,4 +17,8 @@
     <Folder Include="Models\Responses\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SmartCharging.Lib\SmartCharging.Lib.csproj" />
+  </ItemGroup>
+
 </Project>

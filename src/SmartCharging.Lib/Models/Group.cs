@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 
-namespace SmartCharging.Api.Models;
+namespace SmartCharging.Lib.Models;
 
 public record Group
 {
