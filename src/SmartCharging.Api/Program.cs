@@ -1,25 +1,5 @@
 using Microsoft.AspNetCore.Mvc.Versioning;
-using Microsoft.Azure.Cosmos;
-
-// New instance of CosmosClient class
-using CosmosClient client = new(
-    accountEndpoint: "https://gfsc-65527120.documents.azure.com:443/",
-    authKeyOrResourceToken: "dOSnlnRnwT3QQzp7JAg9ijU9lntpoax7wm1v135EVluWtL77cLWUhL0ssXRZ2dXLJWngYIe7BC0oACDbgeYlqw=="
-);
-
-// Database reference with creation if it does not already exist
-Database database = client.GetDatabase(id: "SmartChargingDB");
-
-Console.WriteLine($"New database:\t{database.Id}");
-
-// Container reference with creation if it does not alredy exist
-Container container = await database.CreateContainerIfNotExistsAsync(
-    id: "Group",
-    partitionKeyPath: "/categoryId",
-    throughput: 400
-);
-
-Console.WriteLine($"New container:\t{container.Id}");
+using SmartCharging.Lib;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +21,8 @@ builder.Services.AddApiVersioning(o =>
         new MediaTypeApiVersionReader("ver"));
 
 });
+
+builder.Services.Configure<IDatabaseSettings>(builder.Configuration.GetSection("DatabaseSettings"));
 
 var app = builder.Build();
 
