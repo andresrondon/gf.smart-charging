@@ -8,10 +8,10 @@ public record Connector
     [JsonProperty(PropertyName = "id")]
     public required string EntityId { get; set; }
 
-    [JsonProperty(PropertyName = "partitionKey")]
     public required string ChargeStationId { get; set; }
 
     [Range(1, 5)]
+    [JsonProperty(PropertyName = "numberInStation")]
     public int Id { get; set; }
 
     [Range(1, int.MaxValue, ErrorMessage = "Value for {0} must be minimun {1}")]

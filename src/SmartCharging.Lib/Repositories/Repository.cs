@@ -1,16 +1,19 @@
 ﻿namespace SmartCharging.Lib.Repositories;
 using Microsoft.Azure.Cosmos;
+using SmartCharging.Lib.Models;
+using System;
+using System.Collections.Generic;
 
 public abstract class Repository<TEntity>
 {
     private readonly Container container;
 
-    public Repository(DatabaseSettings databaseSettings, string containerName)
+    public Repository(DatabaseSettings databaseSettings, string containerName, string partitionKey)
     {
         CosmosClient client = new(databaseSettings.AccountEndpoint, databaseSettings.AuthKey);
         Database database = client.GetDatabase(databaseSettings.DatabaseId);
         
-        var createContainerIfNotExist = database.CreateContainerIfNotExistsAsync(containerName, "/partitionKey");
+        var createContainerIfNotExist = database.CreateContainerIfNotExistsAsync(containerName, partitionKey);
         createContainerIfNotExist.Wait();
         
         container = createContainerIfNotExist.Result;
@@ -42,5 +45,10 @@ public abstract class Repository<TEntity>
     public Task DeleteAsync(string id, string partitionKey)
     {
         return container.DeleteItemAsync<TEntity>(id, new PartitionKey(partitionKey));
+    }
+
+    public Task BulkDelete(string partitionKey)
+    {
+        return container.DeleteAllItemsByPartitionKeyStreamAsync(new PartitionKey(partitionKey));
     }
 }

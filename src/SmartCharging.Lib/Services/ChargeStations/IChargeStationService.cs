@@ -1,13 +1,12 @@
 ﻿using SmartCharging.Lib.Models;
 
-namespace SmartCharging.Lib.Repositories.ChargeStations;
+namespace SmartCharging.Lib.Services.ChargeStations;
 
-public interface IChargeStationRepository
+public interface IChargeStationService
 {
     Task AddAsync(ChargeStation station);
     Task<ChargeStation?> FindAsync(string id, string groupId);
     Task UpdateAsync(ChargeStation station);
     Task DeleteAsync(string id, string groupId);
     Task BulkDelete(string groupId);
-    Task<ICollection<ChargeStation>> FindAllByGroupId(string groupId);
 }

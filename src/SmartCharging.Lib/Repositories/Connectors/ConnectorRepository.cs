@@ -5,7 +5,12 @@ namespace SmartCharging.Lib.Repositories.Connectors;
 
 public class ConnectorRepository : Repository<Connector>, IConnectorRepository
 {
-    public ConnectorRepository(IOptions<DatabaseSettings> databaseSettings) : base(databaseSettings.Value, "Connectors")
+    public ConnectorRepository(IOptions<DatabaseSettings> databaseSettings) : base(databaseSettings.Value, "Connectors", "/chargeStationId")
     {
+    }
+
+    public Task<ICollection<Connector>> FindAllByChargeStationId(string stationId)
+    {
+        throw new NotImplementedException();
     }
 }

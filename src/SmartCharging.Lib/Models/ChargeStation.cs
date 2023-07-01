@@ -1,14 +1,11 @@
-﻿using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace SmartCharging.Lib.Models;
 
 public record ChargeStation
 {
-    [JsonProperty(PropertyName = "id")]
     public required string Id { get; set; }
 
-    [JsonProperty(PropertyName = "partitionKey")]
     public required string GroupId { get; set; }
 
     public required string Name { get; set; }

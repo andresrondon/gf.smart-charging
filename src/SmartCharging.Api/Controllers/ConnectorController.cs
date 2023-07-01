@@ -1,10 +1,10 @@
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using SmartCharging.Lib.Models;
-using SmartCharging.Lib.Repositories.Connectors;
 using SmartCharging.Api.Models.Requests;
+using SmartCharging.Lib.Services.Groups;
+using SmartCharging.Lib.Services.Connectors;
 
 namespace SmartCharging.Api.Controllers;
 
@@ -13,11 +13,13 @@ namespace SmartCharging.Api.Controllers;
 [ApiVersion("1.0")]
 public class ConnectorController : ControllerBase
 {
-    private readonly IConnectorRepository repository;
+    private readonly IConnectorService connectorService;
+    private readonly IGroupService groupService;
 
-    public ConnectorController(IConnectorRepository repository)
+    public ConnectorController(IConnectorService connectorService, IGroupService groupService)
     {
-        this.repository = repository;
+        this.connectorService = connectorService;
+        this.groupService = groupService;
     }
 
     [HttpGet, Route("{id}")]
@@ -26,7 +28,7 @@ public class ConnectorController : ControllerBase
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
     public async Task<IActionResult> GetAsync([FromRoute, NotNull] string id, [FromQuery] string chargeStationId)
     {
-        var entity = await repository.FindAsync(id, chargeStationId);
+        var entity = await connectorService.FindAsync(id, chargeStationId);
         return entity is not null ? new JsonResult(entity) : NotFound();
     }
 
@@ -35,8 +37,18 @@ public class ConnectorController : ControllerBase
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
     public async Task<IActionResult> CreateAsync([FromBody] ConnectorCreateRequest request)
     {
+        // Validations
+        var parentGroup = await groupService.FindAsync(request.GroupId);
+        var parentStation = parentGroup?.ChargeStations.FirstOrDefault(cs => cs.Id == request.ChargeStationId);
+        
+        if (!request.Validate(parentGroup, parentStation, out IEnumerable<string> errors))
+        {
+            return StatusCode((int)HttpStatusCode.PreconditionFailed, new { errors });
+        }
+
+        // Save to DB
         var entity = request.ToEntity();
-        await repository.AddAsync(entity);
+        await connectorService.AddAsync(entity);
 
         return Created("connectors", entity);
     }
@@ -47,7 +59,7 @@ public class ConnectorController : ControllerBase
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
     public async Task<IActionResult> UpdateAsync([FromRoute, NotNull] string id, [FromQuery] string chargeStationId, [FromBody] ConnectorUpdateRequest request)
     {
-        var entity = await repository.FindAsync(id, chargeStationId);
+        var entity = await connectorService.FindAsync(id, chargeStationId);
 
         if (entity is null)
         {
@@ -56,7 +68,7 @@ public class ConnectorController : ControllerBase
 
         entity.MaxCurrentInAmps = request.MaxCurrentInAmps ?? entity.MaxCurrentInAmps;
 
-        await repository.UpdateAsync(entity);
+        await connectorService.UpdateAsync(entity);
 
         return new JsonResult(entity);
     }
@@ -67,7 +79,7 @@ public class ConnectorController : ControllerBase
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
     public async Task<IActionResult> DeleteAsync([FromRoute, NotNull] string id, [FromQuery] string chargeStationId)
     {
-        await repository.DeleteAsync(id, chargeStationId);
+        await connectorService.DeleteAsync(id, chargeStationId);
         return Ok();
     }
 }

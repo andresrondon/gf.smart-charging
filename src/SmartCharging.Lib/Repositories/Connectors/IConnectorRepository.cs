@@ -8,4 +8,5 @@ public interface IConnectorRepository
     Task<Connector?> FindAsync(string id, string partitionKey);
     Task UpdateAsync(Connector connector);
     Task DeleteAsync(string id, string partitionKey);
+    Task<ICollection<Connector>> FindAllByChargeStationId(string stationId);
 }

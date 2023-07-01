@@ -1,10 +1,10 @@
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using SmartCharging.Lib.Models;
-using SmartCharging.Lib.Repositories.Groups;
 using SmartCharging.Api.Models.Requests;
+using SmartCharging.Lib.Services.Groups;
+using SmartCharging.Lib.Services.ChargeStations;
 
 namespace SmartCharging.Api.Controllers;
 
@@ -13,20 +13,22 @@ namespace SmartCharging.Api.Controllers;
 [ApiVersion("1.0")]
 public class GroupController : ControllerBase
 {
-    private readonly IGroupRepository repository;
+    private readonly IGroupService groupService;
+    private readonly IChargeStationService stationService;
 
-    public GroupController(IGroupRepository repository)
+    public GroupController(IGroupService groupService, IChargeStationService stationService)
     {
-        this.repository = repository;
+        this.groupService = groupService;
+        this.stationService = stationService;
     }
 
     [HttpGet, Route("{id}")]
     [ProducesResponseType(typeof(Group), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
-    public async Task<IActionResult> GetAsync([FromRoute, NotNull] string id, [FromQuery] string partitionKey = "default-partition")
+    public async Task<IActionResult> GetAsync([FromRoute, NotNull] string id)
     {
-        var entity = await repository.FindAsync(id, partitionKey);
+        var entity = await groupService.FindAsync(id);
         return entity is not null ? new JsonResult(entity) : NotFound();
     }
 
@@ -35,8 +37,9 @@ public class GroupController : ControllerBase
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
     public async Task<IActionResult> CreateAsync([FromBody] GroupCreateRequest request)
     {
+        // Save to DB
         var entity = request.ToEntity();
-        await repository.AddAsync(entity);
+        await groupService.AddAsync(entity);
 
         return Created("groups", entity);
     }
@@ -45,9 +48,9 @@ public class GroupController : ControllerBase
     [ProducesResponseType(typeof(Group), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
-    public async Task<IActionResult> UpdateAsync([FromRoute, NotNull] string id, [FromBody] GroupUpdateRequest request, [FromQuery] string partitionKey = "default-partition")
+    public async Task<IActionResult> UpdateAsync([FromRoute, NotNull] string id, [FromBody] GroupUpdateRequest request)
     {
-        var entity = await repository.FindAsync(id, partitionKey);
+        var entity = await groupService.FindAsync(id);
 
         if (entity is null)
         {
@@ -57,7 +60,7 @@ public class GroupController : ControllerBase
         entity.Name = request.Name ?? entity.Name;
         entity.CapacityInAmps = request.CapacityInAmps ?? entity.CapacityInAmps;
 
-        await repository.UpdateAsync(entity);
+        await groupService.UpdateAsync(entity);
         
         return new JsonResult(entity);
     }
@@ -66,9 +69,10 @@ public class GroupController : ControllerBase
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
-    public async Task<IActionResult> DeleteAsync([FromRoute, NotNull] string id, [FromQuery] string partitionKey = "default-partition")
+    public async Task<IActionResult> DeleteAsync([FromRoute, NotNull] string id)
     {
-        await repository.DeleteAsync(id, partitionKey);
+        await groupService.DeleteAsync(id);
+        await stationService.BulkDelete(groupId: id);
         return Ok();
     }
 }

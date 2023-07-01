@@ -3,8 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using SmartCharging.Lib.Models;
-using SmartCharging.Lib.Repositories.ChargeStations;
 using SmartCharging.Api.Models.Requests;
+using SmartCharging.Lib.Services.ChargeStations;
+using SmartCharging.Lib.Services.Groups;
 
 namespace SmartCharging.Api.Controllers;
 
@@ -13,11 +14,13 @@ namespace SmartCharging.Api.Controllers;
 [ApiVersion("1.0")]
 public class ChargeStationController : ControllerBase
 {
-    private readonly IChargeStationRepository repository;
+    private readonly IChargeStationService stationService;
+    private readonly IGroupService groupService;
 
-    public ChargeStationController(IChargeStationRepository repository)
+    public ChargeStationController(IChargeStationService stationService, IGroupService groupService)
     {
-        this.repository = repository;
+        this.stationService = stationService;
+        this.groupService = groupService;
     }
 
     [HttpGet, Route("{id}")]
@@ -26,7 +29,7 @@ public class ChargeStationController : ControllerBase
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
     public async Task<IActionResult> GetAsync([FromRoute, NotNull] string id, [FromQuery] string groupId)
     {
-        var entity = await repository.FindAsync(id, groupId);
+        var entity = await stationService.FindAsync(id, groupId);
         return entity is not null ? new JsonResult(entity) : NotFound();
     }
 
@@ -35,8 +38,16 @@ public class ChargeStationController : ControllerBase
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
     public async Task<IActionResult> CreateAsync([FromBody] ChargeStationCreateRequest request)
     {
+        // Validations
+        var parentGroup = await groupService.FindAsync(request.GroupId);
+        if (!request.Validate(parentGroup, out IEnumerable<string> errors))
+        {
+            return StatusCode((int)HttpStatusCode.PreconditionFailed, new { errors });
+        }
+
+        // Save to DB
         var entity = request.ToEntity();
-        await repository.AddAsync(entity);
+        await stationService.AddAsync(entity);
 
         return Created("stations", entity);
     }
@@ -47,7 +58,7 @@ public class ChargeStationController : ControllerBase
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
     public async Task<IActionResult> UpdateAsync([FromRoute, NotNull] string id, [FromBody] ChargeStationUpdateRequest request)
     {
-        var entity = await repository.FindAsync(id, "default-partition");
+        var entity = await stationService.FindAsync(id, "default-partition");
 
         if (entity is null)
         {
@@ -56,7 +67,7 @@ public class ChargeStationController : ControllerBase
 
         entity.Name = request.Name ?? entity.Name;
 
-        await repository.UpdateAsync(entity);
+        await stationService.UpdateAsync(entity);
 
         return new JsonResult(entity);
     }
@@ -67,7 +78,7 @@ public class ChargeStationController : ControllerBase
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
     public async Task<IActionResult> DeleteAsync([FromRoute, NotNull] string id, [FromQuery] string partitionKey = "default-partition")
     {
-        await repository.DeleteAsync(id, partitionKey);
+        await stationService.DeleteAsync(id, partitionKey);
         return Ok();
     }
 }
