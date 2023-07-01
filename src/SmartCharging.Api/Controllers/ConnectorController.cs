@@ -1,9 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using SmartCharging.Lib.Models;
-using SmartCharging.Api.Models.Requests;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
+using Microsoft.AspNetCore.Mvc;
+using SmartCharging.Lib.Models;
+using SmartCharging.Lib.Repositories.Connectors;
+using SmartCharging.Api.Models.Requests;
 
 namespace SmartCharging.Api.Controllers;
 
@@ -12,41 +13,61 @@ namespace SmartCharging.Api.Controllers;
 [ApiVersion("1.0")]
 public class ConnectorController : ControllerBase
 {
-    private readonly ILogger<ConnectorController> _logger;
+    private readonly IConnectorRepository repository;
 
-    public ConnectorController(ILogger<ConnectorController> logger)
+    public ConnectorController(IConnectorRepository repository)
     {
-        _logger = logger;
+        this.repository = repository;
+    }
+
+    [HttpGet, Route("{id}")]
+    [ProducesResponseType(typeof(Connector), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
+    [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
+    public async Task<IActionResult> GetAsync([FromRoute, NotNull] string id, [FromQuery] string chargeStationId)
+    {
+        var entity = await repository.FindAsync(id, chargeStationId);
+        return entity is not null ? new JsonResult(entity) : NotFound();
     }
 
     [HttpPost]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.Created)]
-    [ProducesResponseType(typeof(ValidationException), (int)HttpStatusCode.PreconditionFailed)]
-    public Task<IActionResult> CreateAsync([FromBody] ConnectorCreateRequest request)
+    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
+    public async Task<IActionResult> CreateAsync([FromBody] ConnectorCreateRequest request)
     {
-        IActionResult result = Created("connectors", request);
+        var entity = request.ToEntity();
+        await repository.AddAsync(entity);
 
-        return Task.FromResult(result);
+        return Created("connectors", entity);
     }
 
-    [HttpPatch]
-    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
-    [ProducesResponseType(typeof(ValidationException), (int)HttpStatusCode.PreconditionFailed)]
-    public Task<IActionResult> UpdateAsync([FromBody] ConnectorUpdateRequest request)
+    [HttpPatch, Route("{id}")]
+    [ProducesResponseType(typeof(Connector), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
+    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
+    public async Task<IActionResult> UpdateAsync([FromRoute, NotNull] string id, [FromQuery] string chargeStationId, [FromBody] ConnectorUpdateRequest request)
     {
-        IActionResult result = Ok();
+        var entity = await repository.FindAsync(id, chargeStationId);
 
-        return Task.FromResult(result);
+        if (entity is null)
+        {
+            return NotFound();
+        }
+
+        entity.MaxCurrentInAmps = request.MaxCurrentInAmps ?? entity.MaxCurrentInAmps;
+
+        await repository.UpdateAsync(entity);
+
+        return new JsonResult(entity);
     }
 
     [HttpDelete, Route("{id}")]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
-    [ProducesResponseType(typeof(ValidationException), (int)HttpStatusCode.PreconditionFailed)]
-    public Task<IActionResult> DeleteAsync([FromRoute, NotNull] string id)
+    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
+    public async Task<IActionResult> DeleteAsync([FromRoute, NotNull] string id, [FromQuery] string chargeStationId)
     {
-        IActionResult result = Ok();
-
-        return Task.FromResult(result);
+        await repository.DeleteAsync(id, chargeStationId);
+        return Ok();
     }
 }

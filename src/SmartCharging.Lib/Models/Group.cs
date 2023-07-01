@@ -8,6 +8,9 @@ public record Group
     [JsonProperty(PropertyName = "id")]
     public required string Id { get; set; }
 
+    [JsonProperty(PropertyName = "partitionKey")]
+    public required string PartitionKey { get; set; }
+
     public required string Name { get; set; }
 
     [Range(1, int.MaxValue, ErrorMessage = "Value for {0} must be minimun {1}")]

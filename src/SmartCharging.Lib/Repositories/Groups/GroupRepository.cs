@@ -5,7 +5,7 @@ namespace SmartCharging.Lib.Repositories.Groups;
 
 public class GroupRepository : Repository<Group>, IGroupRepository
 {
-    public GroupRepository(IOptions<IDatabaseSettings> databaseSettings) : base(databaseSettings.Value, "Groups")
+    public GroupRepository(IOptions<DatabaseSettings> databaseSettings) : base(databaseSettings.Value, "Groups")
     {
     }
 }

@@ -2,4 +2,5 @@
 
 public class ChargeStationUpdateRequest
 {
+    public string? Name { get; set; }
 }

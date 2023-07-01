@@ -5,13 +5,15 @@ public abstract class Repository<TEntity>
 {
     private readonly Container container;
 
-    public Repository(IDatabaseSettings databaseSettings, string containerName)
+    public Repository(DatabaseSettings databaseSettings, string containerName)
     {
-        using CosmosClient client = new(databaseSettings.AccountEndpoint, databaseSettings.AuthKey);
+        CosmosClient client = new(databaseSettings.AccountEndpoint, databaseSettings.AuthKey);
+        Database database = client.GetDatabase(databaseSettings.DatabaseId);
         
-        container = client
-            .GetDatabase(databaseSettings.DatabaseId)
-            .GetContainer(containerName);
+        var createContainerIfNotExist = database.CreateContainerIfNotExistsAsync(containerName, "/partitionKey");
+        createContainerIfNotExist.Wait();
+        
+        container = createContainerIfNotExist.Result;
     }
 
     public Task AddAsync(TEntity entity)
@@ -19,10 +21,17 @@ public abstract class Repository<TEntity>
         return container.CreateItemAsync(entity);
     }
 
-    public async Task<TEntity> FindAsync(string id, string partitionKey)
+    public async Task<TEntity?> FindAsync(string id, string partitionKey)
     {
-        var response = await container.ReadItemAsync<TEntity>(id, new PartitionKey(partitionKey));
-        return response.Resource;
+        try
+        {
+            var response = await container.ReadItemAsync<TEntity>(id, new PartitionKey(partitionKey));
+            return response.Resource;
+        }
+        catch (CosmosException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return default;
+        }
     }
 
     public Task UpdateAsync(TEntity entity)
@@ -30,7 +39,7 @@ public abstract class Repository<TEntity>
         return container.UpsertItemAsync(entity);
     }
 
-    public Task DeleteAsync(string id, string partitionKey) 
+    public Task DeleteAsync(string id, string partitionKey)
     {
         return container.DeleteItemAsync<TEntity>(id, new PartitionKey(partitionKey));
     }

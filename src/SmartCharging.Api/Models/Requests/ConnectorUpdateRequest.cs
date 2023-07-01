@@ -2,4 +2,5 @@
 
 public class ConnectorUpdateRequest
 {
+    public int? MaxCurrentInAmps { get; set; }
 }

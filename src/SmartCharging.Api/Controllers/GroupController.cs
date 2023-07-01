@@ -1,9 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using SmartCharging.Lib.Models;
-using SmartCharging.Api.Models.Requests;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
+using Microsoft.AspNetCore.Mvc;
+using SmartCharging.Lib.Models;
+using SmartCharging.Lib.Repositories.Groups;
+using SmartCharging.Api.Models.Requests;
 
 namespace SmartCharging.Api.Controllers;
 
@@ -12,75 +13,62 @@ namespace SmartCharging.Api.Controllers;
 [ApiVersion("1.0")]
 public class GroupController : ControllerBase
 {
-    private readonly ILogger<GroupController> _logger;
+    private readonly IGroupRepository repository;
 
-    public GroupController(ILogger<GroupController> logger)
+    public GroupController(IGroupRepository repository)
     {
-        _logger = logger;
+        this.repository = repository;
     }
 
     [HttpGet, Route("{id}")]
     [ProducesResponseType(typeof(Group), (int)HttpStatusCode.OK)]
-    [ProducesResponseType(typeof(ValidationException), (int)HttpStatusCode.PreconditionFailed)]
+    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
-    public Task<Group> GetAsync([FromRoute, NotNull] string id)
+    public async Task<IActionResult> GetAsync([FromRoute, NotNull] string id, [FromQuery] string partitionKey = "default-partition")
     {
-        return Task.FromResult(new Group
-        {
-            Id = id,
-            Name = id
-        });
-    }
-
-    [HttpGet, Route("all")]
-    [ProducesResponseType(typeof(IEnumerable<Group>), (int)HttpStatusCode.OK)]
-    public Task<IActionResult> GetAllAsync()
-    {
-        var groups = new Group[]
-        {
-            new Group
-            {
-                Id = "abc123",
-                Name = "Group 1"
-            }
-        };
-
-        IActionResult result = new JsonResult(groups)
-        {
-            StatusCode = (int)HttpStatusCode.OK,
-        };
-        
-        return Task.FromResult(result);
+        var entity = await repository.FindAsync(id, partitionKey);
+        return entity is not null ? new JsonResult(entity) : NotFound();
     }
 
     [HttpPost]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.Created)]
-    [ProducesResponseType(typeof(ValidationException), (int)HttpStatusCode.PreconditionFailed)]
-    public Task<IActionResult> CreateAsync([FromBody] GroupCreateRequest request)
+    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
+    public async Task<IActionResult> CreateAsync([FromBody] GroupCreateRequest request)
     {
-        IActionResult result = Created("groups", request);
+        var entity = request.ToEntity();
+        await repository.AddAsync(entity);
 
-        return Task.FromResult(result);
+        return Created("groups", entity);
     }
 
-    [HttpPatch]
-    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
-    [ProducesResponseType(typeof(ValidationException), (int)HttpStatusCode.PreconditionFailed)]
-    public Task<IActionResult> UpdateAsync([FromBody] GroupUpdateRequest request)
+    [HttpPatch, Route("{id}")]
+    [ProducesResponseType(typeof(Group), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
+    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
+    public async Task<IActionResult> UpdateAsync([FromRoute, NotNull] string id, [FromBody] GroupUpdateRequest request, [FromQuery] string partitionKey = "default-partition")
     {
-        IActionResult result = Ok();
+        var entity = await repository.FindAsync(id, partitionKey);
 
-        return Task.FromResult(result);
+        if (entity is null)
+        {
+            return NotFound();
+        }
+
+        entity.Name = request.Name ?? entity.Name;
+        entity.CapacityInAmps = request.CapacityInAmps ?? entity.CapacityInAmps;
+
+        await repository.UpdateAsync(entity);
+        
+        return new JsonResult(entity);
     }
 
     [HttpDelete, Route("{id}")]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
-    [ProducesResponseType(typeof(ValidationException), (int)HttpStatusCode.PreconditionFailed)]
-    public Task<IActionResult> DeleteAsync([FromRoute, NotNull] string id)
+    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
+    public async Task<IActionResult> DeleteAsync([FromRoute, NotNull] string id, [FromQuery] string partitionKey = "default-partition")
     {
-        IActionResult result = Ok();
-
-        return Task.FromResult(result);
+        await repository.DeleteAsync(id, partitionKey);
+        return Ok();
     }
 }

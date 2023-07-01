@@ -8,6 +8,9 @@ public record ChargeStation
     [JsonProperty(PropertyName = "id")]
     public required string Id { get; set; }
 
+    [JsonProperty(PropertyName = "partitionKey")]
+    public required string GroupId { get; set; }
+
     public required string Name { get; set; }
 
     [MaxLength(5, ErrorMessage = "A Charging Station cannot have more than {1} {0}")]

@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Mvc.Versioning;
 using SmartCharging.Lib;
+using SmartCharging.Lib.Repositories.ChargeStations;
+using SmartCharging.Lib.Repositories.Connectors;
+using SmartCharging.Lib.Repositories.Groups;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,10 +22,13 @@ builder.Services.AddApiVersioning(o =>
         new QueryStringApiVersionReader("api-version"),
         new HeaderApiVersionReader("X-Version"),
         new MediaTypeApiVersionReader("ver"));
-
 });
 
-builder.Services.Configure<IDatabaseSettings>(builder.Configuration.GetSection("DatabaseSettings"));
+builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection("DatabaseSettings"));
+
+builder.Services.AddSingleton<IGroupRepository, GroupRepository>();
+builder.Services.AddSingleton<IChargeStationRepository, ChargeStationRepository>();
+builder.Services.AddSingleton<IConnectorRepository, ConnectorRepository>();
 
 var app = builder.Build();
 

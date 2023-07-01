@@ -1,9 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using SmartCharging.Lib.Models;
-using SmartCharging.Api.Models.Requests;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
+using Microsoft.AspNetCore.Mvc;
+using SmartCharging.Lib.Models;
+using SmartCharging.Lib.Repositories.ChargeStations;
+using SmartCharging.Api.Models.Requests;
 
 namespace SmartCharging.Api.Controllers;
 
@@ -12,75 +13,61 @@ namespace SmartCharging.Api.Controllers;
 [ApiVersion("1.0")]
 public class ChargeStationController : ControllerBase
 {
-    private readonly ILogger<ChargeStationController> _logger;
+    private readonly IChargeStationRepository repository;
 
-    public ChargeStationController(ILogger<ChargeStationController> logger)
+    public ChargeStationController(IChargeStationRepository repository)
     {
-        _logger = logger;
+        this.repository = repository;
     }
 
     [HttpGet, Route("{id}")]
     [ProducesResponseType(typeof(ChargeStation), (int)HttpStatusCode.OK)]
-    [ProducesResponseType(typeof(ValidationException), (int)HttpStatusCode.PreconditionFailed)]
+    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
-    public Task<ChargeStation> GetAsync([FromRoute, NotNull] string id)
+    public async Task<IActionResult> GetAsync([FromRoute, NotNull] string id, [FromQuery] string groupId)
     {
-        return Task.FromResult(new ChargeStation
-        {
-            Id = id,
-            Name = id
-        });
-    }
-
-    [HttpGet, Route("all")]
-    [ProducesResponseType(typeof(IEnumerable<ChargeStation>), (int)HttpStatusCode.OK)]
-    public Task<IActionResult> GetAllAsync()
-    {
-        var stations = new ChargeStation[]
-        {
-            new ChargeStation
-            {
-                Id = "abc123",
-                Name = "ChargeStation 1"
-            }
-        };
-
-        IActionResult result = new JsonResult(stations)
-        {
-            StatusCode = (int)HttpStatusCode.OK,
-        };
-        
-        return Task.FromResult(result);
+        var entity = await repository.FindAsync(id, groupId);
+        return entity is not null ? new JsonResult(entity) : NotFound();
     }
 
     [HttpPost]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.Created)]
-    [ProducesResponseType(typeof(ValidationException), (int)HttpStatusCode.PreconditionFailed)]
-    public Task<IActionResult> CreateAsync([FromBody] ChargeStationCreateRequest request)
+    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
+    public async Task<IActionResult> CreateAsync([FromBody] ChargeStationCreateRequest request)
     {
-        IActionResult result = Created("stations", request);
+        var entity = request.ToEntity();
+        await repository.AddAsync(entity);
 
-        return Task.FromResult(result);
+        return Created("stations", entity);
     }
 
-    [HttpPatch]
-    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
-    [ProducesResponseType(typeof(ValidationException), (int)HttpStatusCode.PreconditionFailed)]
-    public Task<IActionResult> UpdateAsync([FromBody] ChargeStationUpdateRequest request)
+    [HttpPatch, Route("{id}")]
+    [ProducesResponseType(typeof(ChargeStation), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
+    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
+    public async Task<IActionResult> UpdateAsync([FromRoute, NotNull] string id, [FromBody] ChargeStationUpdateRequest request)
     {
-        IActionResult result = Ok();
+        var entity = await repository.FindAsync(id, "default-partition");
 
-        return Task.FromResult(result);
+        if (entity is null)
+        {
+            return NotFound();
+        }
+
+        entity.Name = request.Name ?? entity.Name;
+
+        await repository.UpdateAsync(entity);
+
+        return new JsonResult(entity);
     }
 
     [HttpDelete, Route("{id}")]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
-    [ProducesResponseType(typeof(ValidationException), (int)HttpStatusCode.PreconditionFailed)]
-    public Task<IActionResult> DeleteAsync([FromRoute, NotNull] string id)
+    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
+    public async Task<IActionResult> DeleteAsync([FromRoute, NotNull] string id, [FromQuery] string partitionKey = "default-partition")
     {
-        IActionResult result = Ok();
-
-        return Task.FromResult(result);
+        await repository.DeleteAsync(id, partitionKey);
+        return Ok();
     }
 }

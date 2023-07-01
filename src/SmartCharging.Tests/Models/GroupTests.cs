@@ -11,6 +11,7 @@ namespace SmartCharging.Api.Tests.Models
             var group = new Group
             {
                 Id = Guid.NewGuid().ToString(),
+                PartitionKey = Guid.NewGuid().ToString(),
                 Name = "Group 1",
                 CapacityInAmps = 0
             };
