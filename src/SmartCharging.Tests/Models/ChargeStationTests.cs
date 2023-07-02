@@ -6,7 +6,7 @@ namespace SmartCharging.Api.Tests.Models
     public class ChargeStationTests
     {
         [Fact]
-        public void ThrowsValidationExceptionWhenZeroOrNegativeMaxCurrent()
+        public void ThrowsValidationExceptionWhenHasMoreThanFiveConnectors()
         {
             var station = new ChargeStation
             {

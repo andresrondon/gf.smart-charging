@@ -18,9 +18,12 @@ public class ConnectorService : IConnectorService
 
     public async Task AddAsync(string location, string groupId, string stationId, Connector connector)
     {
+        // TODO: to refactor
         var parentGroup = await groupRepository.FindAsync(groupId, location) ?? throw new NotFoundException("Group not found.");
         parentGroup.ChargeStations = await stationRepository.FindAllByGroupIdAsync(groupId);
         var parentStation = parentGroup.ChargeStations.FirstOrDefault(cs => cs.Id == stationId) ?? throw new NotFoundException("Charge Station not found.");
+        // ---
+
         parentStation.Connectors.Add(connector);
 
         BusinessRules
@@ -46,12 +49,15 @@ public class ConnectorService : IConnectorService
 
     public async Task UpdateAsync(string location, string groupId, string stationId, Connector connector)
     {
+        // TODO: to refactor
         var parentGroup = await groupRepository.FindAsync(groupId, location) ?? throw new NotFoundException("Group not found.");
         parentGroup.ChargeStations = await stationRepository.FindAllByGroupIdAsync(groupId);
         var parentStation = parentGroup.ChargeStations.FirstOrDefault(cs => cs.Id == stationId) ?? throw new NotFoundException("Charge Station not found.");
-        var childConnector = parentStation.Connectors.FirstOrDefault(c => c.Id == connector.Id) ?? throw new NotFoundException("Connector not found.");
+        // ---
+        
+        var oldConnector = parentStation.Connectors.FirstOrDefault(c => c.Id == connector.Id) ?? throw new NotFoundException("Connector not found.");
 
-        parentStation.Connectors.Remove(childConnector);
+        parentStation.Connectors.Remove(oldConnector);
         parentStation.Connectors.Add(connector);
 
         BusinessRules

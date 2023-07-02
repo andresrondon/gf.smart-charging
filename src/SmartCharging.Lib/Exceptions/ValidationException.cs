@@ -8,5 +8,6 @@ public class ValidationException : Exception
         : base("One or more business rules validation errors occoured.")
     {
         Errors = errors;
+        Data["errors"] = Errors;
     }
 }

@@ -13,7 +13,6 @@ public record ChargeStation
 
     public required string Name { get; set; }
 
-    [MinLength(1, ErrorMessage = "A Charging Station must have at least {1} {0}")]
-    [MaxLength(5, ErrorMessage = "A Charging Station cannot have more than {1} {0}")]
+    [MinLength(1), MaxLength(5)]
     public ICollection<Connector> Connectors { get; set; } = new List<Connector>();
 }

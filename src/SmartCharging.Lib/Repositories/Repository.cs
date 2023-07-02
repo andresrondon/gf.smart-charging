@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.Cosmos;
+using System.ComponentModel.DataAnnotations;
 
 namespace SmartCharging.Lib.Repositories;
 
@@ -19,6 +20,7 @@ public abstract class Repository<TEntity>
 
     public Task AddAsync(TEntity entity)
     {
+        Validator.ValidateObject(entity, new ValidationContext(entity), validateAllProperties: true);
         return container.CreateItemAsync(entity);
     }
 
@@ -37,6 +39,7 @@ public abstract class Repository<TEntity>
 
     public Task UpdateAsync(TEntity entity)
     {
+        Validator.ValidateObject(entity, new ValidationContext(entity), validateAllProperties: true);
         return container.UpsertItemAsync(entity);
     }
 
