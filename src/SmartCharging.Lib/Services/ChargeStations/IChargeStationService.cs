@@ -4,9 +4,8 @@ namespace SmartCharging.Lib.Services.ChargeStations;
 
 public interface IChargeStationService
 {
-    Task AddAsync(ChargeStation station);
-    Task<ChargeStation?> FindAsync(string id, string groupId);
+    Task AddAsync(string location, ChargeStation station);
+    Task<ChargeStation?> FindAsync(string groupId, string stationId);
     Task UpdateAsync(ChargeStation station);
-    Task DeleteAsync(string id, string groupId);
-    Task BulkDelete(string groupId);
+    Task DeleteAsync(string groupId, string stationId);
 }

@@ -8,6 +8,6 @@ public interface IChargeStationRepository
     Task<ChargeStation?> FindAsync(string id, string groupId);
     Task UpdateAsync(ChargeStation station);
     Task DeleteAsync(string id, string groupId);
-    Task BulkDelete(string groupId);
-    Task<ICollection<ChargeStation>> FindAllByGroupId(string groupId);
+    Task BulkDeleteAsync(string groupId);
+    Task<ICollection<ChargeStation>> FindAllByGroupIdAsync(string groupId);
 }

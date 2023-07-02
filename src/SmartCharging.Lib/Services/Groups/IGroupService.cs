@@ -5,7 +5,7 @@ namespace SmartCharging.Lib.Services.Groups;
 public interface IGroupService
 {
     Task AddAsync(Group group);
-    Task<Group?> FindAsync(string id);
+    Task<Group?> FindAsync(string location, string groupId);
     Task UpdateAsync(Group group);
-    Task DeleteAsync(string id);
+    Task DeleteAsync(string location, string id);
 }

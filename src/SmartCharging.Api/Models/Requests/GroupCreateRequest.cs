@@ -4,6 +4,8 @@ namespace SmartCharging.Api.Models.Requests;
 
 public class GroupCreateRequest
 {
+    public required string LocationArea { get; set; }
+
     public required string Name { get; set; }
 
     public int CapacityInAmps { get; set; }
@@ -13,7 +15,7 @@ public class GroupCreateRequest
         return new Group()
         { 
             Id = Guid.NewGuid().ToString(),
-            PartitionKey = "default-partition",
+            LocationArea = LocationArea,
             Name = Name,
             CapacityInAmps = CapacityInAmps
         };

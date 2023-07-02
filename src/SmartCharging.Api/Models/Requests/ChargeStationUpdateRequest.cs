@@ -1,4 +1,6 @@
-﻿namespace SmartCharging.Api.Models.Requests;
+﻿using SmartCharging.Lib.Models;
+
+namespace SmartCharging.Api.Models.Requests;
 
 public class ChargeStationUpdateRequest
 {

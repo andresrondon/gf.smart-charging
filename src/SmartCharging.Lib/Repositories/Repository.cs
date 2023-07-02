@@ -1,12 +1,10 @@
-﻿namespace SmartCharging.Lib.Repositories;
-using Microsoft.Azure.Cosmos;
-using SmartCharging.Lib.Models;
-using System;
-using System.Collections.Generic;
+﻿using Microsoft.Azure.Cosmos;
+
+namespace SmartCharging.Lib.Repositories;
 
 public abstract class Repository<TEntity>
 {
-    private readonly Container container;
+    protected readonly Container container;
 
     public Repository(DatabaseSettings databaseSettings, string containerName, string partitionKey)
     {
@@ -47,8 +45,8 @@ public abstract class Repository<TEntity>
         return container.DeleteItemAsync<TEntity>(id, new PartitionKey(partitionKey));
     }
 
-    public Task BulkDelete(string partitionKey)
+    public async Task BulkDeleteAsync(string partitionKey)
     {
-        return container.DeleteAllItemsByPartitionKeyStreamAsync(new PartitionKey(partitionKey));
+        _ = await container.DeleteAllItemsByPartitionKeyStreamAsync(new PartitionKey(partitionKey));
     }
 }

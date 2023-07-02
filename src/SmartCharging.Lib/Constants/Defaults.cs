@@ -2,5 +2,5 @@
 
 public static class Defaults
 {
-    public const string PartitionKey = "default-partition";
+    public const string Location = "Amsterdam";
 }

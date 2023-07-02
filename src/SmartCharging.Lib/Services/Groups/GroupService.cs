@@ -1,6 +1,5 @@
 ﻿using SmartCharging.Lib.Models;
 using SmartCharging.Lib.Repositories.ChargeStations;
-using SmartCharging.Lib.Repositories.Connectors;
 using SmartCharging.Lib.Repositories.Groups;
 
 namespace SmartCharging.Lib.Services.Groups;
@@ -9,41 +8,46 @@ public class GroupService : IGroupService
 {
     private readonly IGroupRepository groupRepository;
     private readonly IChargeStationRepository stationRepository;
-    private readonly IConnectorRepository connectorRepository;
 
-    public GroupService(IGroupRepository groupRepository, IChargeStationRepository stationRepository, IConnectorRepository connectorRepository)
+    public GroupService(IGroupRepository groupRepository, IChargeStationRepository stationRepository)
     {
         this.groupRepository = groupRepository;
         this.stationRepository = stationRepository;
-        this.connectorRepository = connectorRepository;
     }
 
     public Task AddAsync(Group group)
     {
+        BusinessRules
+            .ValidateGroupUpdate(group)
+            .ThrowIfInValid();
+
         return groupRepository.AddAsync(group);
     }
 
-    public Task DeleteAsync(string id)
+    public async Task DeleteAsync(string location, string id)
     {
-        return groupRepository.DeleteAsync(id, Constants.Defaults.PartitionKey);
+        await stationRepository.BulkDeleteAsync(id);
+        await groupRepository.DeleteAsync(id, location);
     }
 
-    public async Task<Group?> FindAsync(string id)
+    public async Task<Group?> FindAsync(string location, string id)
     {
-        var group = await groupRepository.FindAsync(id, Constants.Defaults.PartitionKey);
-        
-        // Populate child entities
-        group.ChargeStations = await stationRepository.FindAllByGroupId(id);
-        foreach (var station in group.ChargeStations)
+        var group = await groupRepository.FindAsync(id, location);
+
+        if (group is not null)
         {
-            station.Connectors = await connectorRepository.FindAllByChargeStationId(station.Id);
+            group.ChargeStations = await stationRepository.FindAllByGroupIdAsync(id);
         }
-        
+
         return group;
     }
 
     public Task UpdateAsync(Group group)
     {
+        BusinessRules
+            .ValidateGroupUpdate(group)
+            .ThrowIfInValid();
+
         return groupRepository.UpdateAsync(group);
     }
 }
