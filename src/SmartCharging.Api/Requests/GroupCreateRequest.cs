@@ -1,6 +1,6 @@
 ﻿using SmartCharging.Lib.Models;
 
-namespace SmartCharging.Api.Models.Requests;
+namespace SmartCharging.Api.Requests;
 
 public class GroupCreateRequest
 {
@@ -11,7 +11,7 @@ public class GroupCreateRequest
     public Group ToEntity(string locationArea)
     {
         return new Group()
-        { 
+        {
             Id = Guid.NewGuid().ToString(),
             LocationArea = locationArea,
             Name = Name,

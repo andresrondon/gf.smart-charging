@@ -1,6 +1,6 @@
 ﻿using SmartCharging.Lib.Models;
 
-namespace SmartCharging.Api.Models.Requests;
+namespace SmartCharging.Api.Requests;
 
 public class ChargeStationCreateRequest
 {
@@ -11,8 +11,8 @@ public class ChargeStationCreateRequest
     public ChargeStation ToEntity(string groupId)
     {
         return new ChargeStation
-        { 
-            Id = Guid.NewGuid().ToString(), 
+        {
+            Id = Guid.NewGuid().ToString(),
             GroupId = groupId,
             Name = Name,
             Connectors = Connectors

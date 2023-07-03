@@ -2,9 +2,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using SmartCharging.Lib.Models;
-using SmartCharging.Api.Models.Requests;
 using SmartCharging.Lib.Services.ChargeStations;
 using SmartCharging.Lib.Constants;
+using SmartCharging.Api.Requests;
 
 namespace SmartCharging.Api.Controllers;
 
