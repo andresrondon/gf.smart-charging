@@ -6,27 +6,16 @@ public class ChargeStationCreateRequest
 {
     public required string Name { get; set; }
 
+    public required ICollection<Connector> Connectors { get; set; }
+
     public ChargeStation ToEntity(string groupId)
     {
         return new ChargeStation
         { 
             Id = Guid.NewGuid().ToString(), 
             GroupId = groupId,
-            Name = Name
+            Name = Name,
+            Connectors = Connectors
         };
-    }
-
-    public bool Validate(Group? parentGroup, out IEnumerable<string> errors)
-    {
-        var errorList = new List<string>();
-
-        if (parentGroup is null)
-        {
-            errorList.Add("Charge Station of ChargeStationId in GroupId does not exists.");
-        }
-
-        errors = errorList;
-
-        return !errors.Any();
     }
 }

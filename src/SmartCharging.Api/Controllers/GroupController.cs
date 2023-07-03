@@ -5,8 +5,6 @@ using SmartCharging.Lib.Models;
 using SmartCharging.Api.Models.Requests;
 using SmartCharging.Lib.Services.Groups;
 using SmartCharging.Lib.Constants;
-using SmartCharging.Lib.Services.Connectors;
-using SmartCharging.Lib.Exceptions;
 
 namespace SmartCharging.Api.Controllers;
 
@@ -29,15 +27,15 @@ public class GroupController : ControllerBase
     public async Task<IActionResult> GetAsync([FromRoute, NotNull] string id, [FromQuery] string locationArea = Defaults.Location)
     {
         var entity = await groupService.FindAsync(locationArea, id);
-        return entity is not null ? new JsonResult(entity) : NotFound(new { groupId = id });
+        return new JsonResult(entity);
     }
 
     [HttpPost]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.Created)]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
-    public async Task<IActionResult> CreateAsync([FromBody] GroupCreateRequest request)
+    public async Task<IActionResult> CreateAsync([FromBody] GroupCreateRequest request, [FromQuery] string locationArea = Defaults.Location)
     {
-        var entity = request.ToEntity();
+        var entity = request.ToEntity(locationArea);
         await groupService.AddAsync(entity);
 
         return Created("groups", entity);
@@ -51,22 +49,10 @@ public class GroupController : ControllerBase
     {
         var entity = await groupService.FindAsync(locationArea, id);
 
-        if (entity is null)
-        {
-            return NotFound(new { groupId = id });
-        }
-
         entity.Name = request.Name ?? entity.Name;
         entity.CapacityInAmps = request.CapacityInAmps ?? entity.CapacityInAmps;
 
-        try
-        {
-            await groupService.UpdateAsync(entity);
-        }
-        catch (ValidationException ex)
-        {
-            return StatusCode((int)HttpStatusCode.PreconditionFailed, new { message = ex.Message, errors = ex.Errors });
-        }
+        await groupService.UpdateAsync(entity);
 
         return new JsonResult(entity);
     }

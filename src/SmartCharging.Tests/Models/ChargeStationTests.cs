@@ -11,6 +11,7 @@ namespace SmartCharging.Api.Tests.Models
             var station = new ChargeStation
             {
                 Id = Guid.NewGuid().ToString(),
+                GroupId = Guid.NewGuid().ToString(),
                 Name = "Charge Station 1",
                 Connectors =
                 {

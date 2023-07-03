@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc.Versioning;
+using SmartCharging.Api.Filters;
 using SmartCharging.Lib;
 using SmartCharging.Lib.Repositories.ChargeStations;
 using SmartCharging.Lib.Repositories.Groups;
@@ -10,7 +11,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(o =>
+{
+    o.Filters.Add<HttpResponseExceptionFilter>();
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

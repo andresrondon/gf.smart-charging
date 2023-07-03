@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
@@ -6,8 +5,6 @@ using SmartCharging.Lib.Models;
 using SmartCharging.Api.Models.Requests;
 using SmartCharging.Lib.Services.ChargeStations;
 using SmartCharging.Lib.Constants;
-using SmartCharging.Lib.Exceptions;
-using SmartCharging.Lib.Services.Connectors;
 
 namespace SmartCharging.Api.Controllers;
 
@@ -30,7 +27,7 @@ public class ChargeStationController : ControllerBase
     public async Task<IActionResult> GetAsync([FromRoute, NotNull] string groupId, [FromRoute, NotNull] string stationId)
     {
         var entity = await stationService.FindAsync(groupId, stationId);
-        return entity is not null ? new JsonResult(entity) : NotFound(new { groupId, stationId });
+        return new JsonResult(entity);
     }
 
     [HttpPost]
@@ -40,16 +37,8 @@ public class ChargeStationController : ControllerBase
         [FromQuery] string locationArea = Defaults.Location)
     {
         var entity = request.ToEntity(groupId);
-
-        try
-        {
-            await stationService.AddAsync(locationArea, entity);
-        }
-        catch (NotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-
+        await stationService.AddAsync(locationArea, entity);
+        
         return Created("stations", entity);
     }
 
@@ -57,18 +46,15 @@ public class ChargeStationController : ControllerBase
     [ProducesResponseType(typeof(ChargeStation), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
-    public async Task<IActionResult> UpdateAsync([FromRoute, NotNull] string groupId, [FromRoute, NotNull] string stationId, [FromBody] ChargeStationUpdateRequest request)
+    public async Task<IActionResult> UpdateAsync([FromRoute, NotNull] string groupId, [FromRoute, NotNull] string stationId, [FromBody] ChargeStationUpdateRequest request,
+        [FromQuery] string locationArea = Defaults.Location)
     {
         var entity = await stationService.FindAsync(groupId, stationId);
 
-        if (entity is null)
-        {
-            return NotFound();
-        }
-
         entity.Name = request.Name ?? entity.Name;
+        entity.Connectors = request.Connectors ?? entity.Connectors;
 
-        await stationService.UpdateAsync(entity);
+        await stationService.UpdateAsync(locationArea, entity);
 
         return new JsonResult(entity);
     }

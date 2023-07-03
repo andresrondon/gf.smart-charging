@@ -30,16 +30,9 @@ public class GroupService : IGroupService
         await groupRepository.DeleteAsync(id, location);
     }
 
-    public async Task<Group?> FindAsync(string location, string id)
+    public Task<Group> FindAsync(string location, string id)
     {
-        var group = await groupRepository.FindAsync(id, location);
-
-        if (group is not null)
-        {
-            group.ChargeStations = await stationRepository.FindAllByGroupIdAsync(id);
-        }
-
-        return group;
+        return groupRepository.FindAsync(id, location);
     }
 
     public Task UpdateAsync(Group group)

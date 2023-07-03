@@ -1,20 +1,24 @@
 ﻿using Microsoft.Azure.Cosmos;
+using SmartCharging.Lib.Exceptions;
 using System.ComponentModel.DataAnnotations;
 
 namespace SmartCharging.Lib.Repositories;
 
 public abstract class Repository<TEntity>
 {
+    protected readonly Database database;
     protected readonly Container container;
+    private readonly string partitionKeyPropertyName;
 
-    public Repository(DatabaseSettings databaseSettings, string containerName, string partitionKey)
+    public Repository(DatabaseSettings databaseSettings, string containerName, string partitionKeyPath)
     {
         CosmosClient client = new(databaseSettings.AccountEndpoint, databaseSettings.AuthKey);
-        Database database = client.GetDatabase(databaseSettings.DatabaseId);
+        database = client.GetDatabase(databaseSettings.DatabaseId);
         
-        var createContainerIfNotExist = database.CreateContainerIfNotExistsAsync(containerName, partitionKey);
+        var createContainerIfNotExist = database.CreateContainerIfNotExistsAsync(containerName, partitionKeyPath);
         createContainerIfNotExist.Wait();
         
+        partitionKeyPropertyName = partitionKeyPath.Replace("/", "");
         container = createContainerIfNotExist.Result;
     }
 
@@ -24,7 +28,7 @@ public abstract class Repository<TEntity>
         return container.CreateItemAsync(entity);
     }
 
-    public async Task<TEntity?> FindAsync(string id, string partitionKey)
+    public virtual async Task<TEntity> FindAsync(string id, string partitionKey)
     {
         try
         {
@@ -33,7 +37,14 @@ public abstract class Repository<TEntity>
         }
         catch (CosmosException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
-            return default;
+            throw new ResourceNotFoundException($"{typeof(TEntity).Name} not found.")
+            {
+                Resource = new Dictionary<string, object>()
+                {
+                    { "id", id },
+                    { partitionKeyPropertyName, partitionKey }
+                }
+            };
         }
     }
 

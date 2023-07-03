@@ -19,9 +19,8 @@ public class ConnectorService : IConnectorService
     public async Task AddAsync(string location, string groupId, string stationId, Connector connector)
     {
         // TODO: to refactor
-        var parentGroup = await groupRepository.FindAsync(groupId, location) ?? throw new NotFoundException("Group not found.");
-        parentGroup.ChargeStations = await stationRepository.FindAllByGroupIdAsync(groupId);
-        var parentStation = parentGroup.ChargeStations.FirstOrDefault(cs => cs.Id == stationId) ?? throw new NotFoundException("Charge Station not found.");
+        var parentGroup = await groupRepository.FindAsync(groupId, location);
+        var parentStation = parentGroup.ChargeStations.FirstOrDefault(cs => cs.Id == stationId) ?? throw new ResourceNotFoundException("Charge Station not found.");
         // ---
 
         parentStation.Connectors.Add(connector);
@@ -35,27 +34,27 @@ public class ConnectorService : IConnectorService
 
     public async Task DeleteAsync(string groupId, string stationId, int connectorId)
     {
-        var parentStation = await stationRepository.FindAsync(stationId, groupId) ?? throw new NotFoundException("Charge Station not found.");
-        var connector = parentStation.Connectors.FirstOrDefault(cs => cs.Id == connectorId) ?? throw new NotFoundException("Connector not found.");
+        var parentStation = await stationRepository.FindAsync(stationId, groupId);
+        var connector = GetConnectorOrThrow(parentStation, connectorId);
         parentStation.Connectors.Remove(connector);
+
         await stationRepository.UpdateAsync(parentStation);
     }
 
-    public async Task<Connector?> FindAsync(string groupId, string stationId, int connectorId)
+    public async Task<Connector> FindAsync(string groupId, string stationId, int connectorId)
     {
         var parentStation = await stationRepository.FindAsync(stationId, groupId);
-        return parentStation?.Connectors.FirstOrDefault(cs => cs.Id == connectorId);
+        return GetConnectorOrThrow(parentStation, connectorId);
     }
 
     public async Task UpdateAsync(string location, string groupId, string stationId, Connector connector)
     {
         // TODO: to refactor
-        var parentGroup = await groupRepository.FindAsync(groupId, location) ?? throw new NotFoundException("Group not found.");
-        parentGroup.ChargeStations = await stationRepository.FindAllByGroupIdAsync(groupId);
-        var parentStation = parentGroup.ChargeStations.FirstOrDefault(cs => cs.Id == stationId) ?? throw new NotFoundException("Charge Station not found.");
+        var parentGroup = await groupRepository.FindAsync(groupId, location);
+        var parentStation = parentGroup.ChargeStations.FirstOrDefault(cs => cs.Id == stationId) ?? throw new ResourceNotFoundException("Charge Station not found.");
         // ---
-        
-        var oldConnector = parentStation.Connectors.FirstOrDefault(c => c.Id == connector.Id) ?? throw new NotFoundException("Connector not found.");
+
+        var oldConnector = GetConnectorOrThrow(parentStation, connector.Id);
 
         parentStation.Connectors.Remove(oldConnector);
         parentStation.Connectors.Add(connector);
@@ -66,4 +65,7 @@ public class ConnectorService : IConnectorService
 
         await stationRepository.UpdateAsync(parentStation!);
     }
+
+    private static Connector GetConnectorOrThrow(ChargeStation parentStation, int connectorId) 
+        => parentStation.Connectors.FirstOrDefault(c => c.Id == connectorId) ?? throw new ResourceNotFoundException("Connector not found.");
 }

@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using SmartCharging.Lib.Models;
 using SmartCharging.Api.Models.Requests;
 using SmartCharging.Lib.Services.Connectors;
-using SmartCharging.Lib.Exceptions;
 using SmartCharging.Lib.Constants;
 
 namespace SmartCharging.Api.Controllers;
@@ -28,7 +27,7 @@ public class ConnectorController : ControllerBase
     public async Task<IActionResult> GetAsync([FromRoute, NotNull] string groupId, [FromRoute, NotNull] string stationId, [FromRoute, NotNull] int connectorId)
     {
         var entity = await connectorService.FindAsync(groupId, stationId, connectorId);
-        return entity is not null ? new JsonResult(entity) : NotFound(new { groupId, stationId, connectorId });
+        return new JsonResult(entity);
     }
 
     [HttpPost]
@@ -41,19 +40,7 @@ public class ConnectorController : ControllerBase
         [FromQuery] string locationArea = Defaults.Location)
     {
         var entity = request.ToEntity();
-
-        try
-        {
-            await connectorService.AddAsync(locationArea, groupId, stationId, entity);
-        }
-        catch (NotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
-        catch (ValidationException ex)
-        {
-            return StatusCode((int)HttpStatusCode.PreconditionFailed, new { message = ex.Message, errors = ex.Errors });
-        }
+        await connectorService.AddAsync(locationArea, groupId, stationId, entity);
 
         return Created("connectors", entity);
     }
@@ -71,21 +58,9 @@ public class ConnectorController : ControllerBase
     {
         var entity = await connectorService.FindAsync(groupId, stationId, connectorId);
 
-        if (entity is null)
-        {
-            return NotFound(new { groupId, stationId, connectorId });
-        }
-
         entity.MaxCurrentInAmps = request.MaxCurrentInAmps ?? entity.MaxCurrentInAmps;
 
-        try
-        {
-            await connectorService.UpdateAsync(locationArea, groupId, stationId, entity);
-        }
-        catch (ValidationException ex)
-        {
-            return StatusCode((int)HttpStatusCode.PreconditionFailed, new { message = ex.Message, errors = ex.Errors });
-        }
+        await connectorService.UpdateAsync(locationArea, groupId, stationId, entity);
 
         return new JsonResult(entity);
     }

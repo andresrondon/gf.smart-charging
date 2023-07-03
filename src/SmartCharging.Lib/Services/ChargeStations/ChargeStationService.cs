@@ -1,5 +1,4 @@
-﻿using SmartCharging.Lib.Exceptions;
-using SmartCharging.Lib.Models;
+﻿using SmartCharging.Lib.Models;
 using SmartCharging.Lib.Repositories.ChargeStations;
 using SmartCharging.Lib.Repositories.Groups;
 
@@ -18,7 +17,13 @@ public class ChargeStationService : IChargeStationService
 
     public async Task AddAsync(string location, ChargeStation station)
     {
-        _ = await groupRepository.FindAsync(station.GroupId, location) ?? throw new NotFoundException("Group not found.");
+        // Validate
+        var group = await groupRepository.FindAsync(station.GroupId, location);
+        BusinessRules
+            .ValidateChargeStationUpdate(station, group)
+            .ThrowIfInValid();
+
+        // Add resource
         await stationRepository.AddAsync(station);
     }
 
@@ -27,13 +32,20 @@ public class ChargeStationService : IChargeStationService
         return stationRepository.DeleteAsync(id, groupId);
     }
 
-    public Task<ChargeStation?> FindAsync(string groupId, string id)
+    public Task<ChargeStation> FindAsync(string groupId, string id)
     {
         return stationRepository.FindAsync(id, groupId);
     }
 
-    public Task UpdateAsync(ChargeStation station)
+    public async Task UpdateAsync(string location, ChargeStation station)
     {
-        return stationRepository.UpdateAsync(station);
+        // Validate
+        var group = await groupRepository.FindAsync(station.GroupId, location);
+        BusinessRules
+            .ValidateChargeStationUpdate(station, group)
+            .ThrowIfInValid();
+        
+        // Update
+        await stationRepository.UpdateAsync(station);
     }
 }

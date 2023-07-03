@@ -5,14 +5,12 @@ namespace SmartCharging.Lib.Services;
 
 internal static class BusinessRules
 {
+    private const int MinConnectorsPerStation = 1;
+    private const int MaxConnectorsPerStation = 5;
+
     internal static ValidationMessageList ValidateGroupUpdate(Group group)
     {
         var errorList = new ValidationMessageList();
-
-        if (group.CapacityInAmps <= 0)
-        {
-            errorList.Add($"{nameof(Group.CapacityInAmps)} must be greater than 0.");
-        }
 
         var maxCurrentSum = group.ChargeStations.Sum(cs => cs.Connectors.Sum(c => c.MaxCurrentInAmps));
         if (maxCurrentSum > group.CapacityInAmps)
@@ -27,14 +25,14 @@ internal static class BusinessRules
     {
         var errorList = new ValidationMessageList();
 
-        if (!(connector.Id >= 1 && connector.Id <= 5))
+        if (parentStation.Connectors.Count > MaxConnectorsPerStation)
         {
-            errorList.Add($"Connector Id must be between 1 and 5. Actual: {connector.Id}");
+            errorList.Add($"A station cannot have more than {MaxConnectorsPerStation} connectors.");
         }
 
-        if (parentStation?.Connectors.Count(c => c.Id == connector.Id) > 1)
+        if (parentStation.Connectors.Count(c => c.Id == connector.Id) > 1)
         {
-            errorList.Add($"Connector Id {connector.Id} already exists within Charge Station.");
+            errorList.Add($"Connector Id {connector.Id} already exists within this Charge Station.");
         }
 
         if (connector.MaxCurrentInAmps <= 0)
@@ -42,10 +40,38 @@ internal static class BusinessRules
             errorList.Add($"{nameof(Connector.MaxCurrentInAmps)} must be greater than 0.");
         }
 
-        var maxCurrentSum = parentGroup?.ChargeStations.Sum(cs => cs.Connectors.Where(c => c.Id != connector.Id).Sum(c => c.MaxCurrentInAmps));
-        if (parentGroup is not null && maxCurrentSum + connector.MaxCurrentInAmps > parentGroup.CapacityInAmps)
+        var maxCurrentSum = parentGroup.ChargeStations.Sum(cs => cs.Connectors.Where(c => cs.Id != parentStation.Id || c.Id != connector.Id).Sum(c => c.MaxCurrentInAmps));
+        if (maxCurrentSum + connector.MaxCurrentInAmps > parentGroup.CapacityInAmps)
         {
             errorList.Add($"Adding this connector's {nameof(Connector.MaxCurrentInAmps)} exceeds the Group's {nameof(Group.CapacityInAmps)}. Group's Capacity in Amps: {parentGroup.CapacityInAmps}. Sum of all other connectors' Max Current: {maxCurrentSum}.");
+        }
+
+        return errorList;
+    }
+
+    internal static ValidationMessageList ValidateChargeStationUpdate(ChargeStation station, Group parentGroup)
+    {
+        var errorList = new ValidationMessageList();
+
+        if (station.Connectors.Count < MinConnectorsPerStation)
+        {
+            errorList.Add($"A station must have at least {MinConnectorsPerStation} connector.");
+        }
+
+        if (station.Connectors.Count > MaxConnectorsPerStation)
+        {
+            errorList.Add($"A station cannot have more than {MaxConnectorsPerStation} connectors.");
+        }
+
+        if (station.Connectors.DistinctBy(c => c.Id).Count() != station.Connectors.Count)
+        {
+            errorList.Add($"Connector Ids must be unique.");
+        }
+
+        var maxCurrentSum = parentGroup.ChargeStations.Where(cs => cs.Id != station.Id).Sum(cs => cs.Connectors.Sum(c => c.MaxCurrentInAmps));
+        if (maxCurrentSum + station.Connectors.Sum(c => c.MaxCurrentInAmps) > parentGroup.CapacityInAmps)
+        {
+            errorList.Add($"The sum of the connectors' {nameof(Connector.MaxCurrentInAmps)} exceeds the Group's {nameof(Group.CapacityInAmps)}. Group's Capacity in Amps: {parentGroup.CapacityInAmps}. Sum of all other connectors' Max Current: {maxCurrentSum}.");
         }
 
         return errorList;
@@ -59,7 +85,7 @@ internal static class BusinessRules
         {
             if (!IsValid)
             {
-                throw new ValidationException(this);
+                throw new BusinessRulesValidationException(this);
             }
         }
     }
