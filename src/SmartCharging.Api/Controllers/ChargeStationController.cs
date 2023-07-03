@@ -33,11 +33,10 @@ public class ChargeStationController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.Created)]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
-    public async Task<IActionResult> CreateAsync([FromRoute, NotNull] string groupId, [FromBody] ChargeStationCreateRequest request,
-        [FromQuery] string locationArea = Defaults.Location)
+    public async Task<IActionResult> CreateAsync([FromRoute, NotNull] string groupId, [FromBody] ChargeStationCreateRequest request)
     {
         var entity = request.ToEntity(groupId);
-        await stationService.AddAsync(locationArea, entity);
+        await stationService.AddAsync(entity);
         
         return Created("stations", entity);
     }
@@ -46,15 +45,14 @@ public class ChargeStationController : ControllerBase
     [ProducesResponseType(typeof(ChargeStation), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
-    public async Task<IActionResult> UpdateAsync([FromRoute, NotNull] string groupId, [FromRoute, NotNull] string stationId, [FromBody] ChargeStationUpdateRequest request,
-        [FromQuery] string locationArea = Defaults.Location)
+    public async Task<IActionResult> UpdateAsync([FromRoute, NotNull] string groupId, [FromRoute, NotNull] string stationId, [FromBody] ChargeStationUpdateRequest request)
     {
         var entity = await stationService.FindAsync(groupId, stationId);
 
         entity.Name = request.Name ?? entity.Name;
         entity.Connectors = request.Connectors ?? entity.Connectors;
 
-        await stationService.UpdateAsync(locationArea, entity);
+        await stationService.UpdateAsync(entity);
 
         return new JsonResult(entity);
     }

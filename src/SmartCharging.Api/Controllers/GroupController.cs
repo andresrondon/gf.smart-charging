@@ -3,7 +3,6 @@ using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using SmartCharging.Lib.Models;
 using SmartCharging.Lib.Services.Groups;
-using SmartCharging.Lib.Constants;
 using SmartCharging.Api.Requests;
 
 namespace SmartCharging.Api.Controllers;
@@ -24,18 +23,18 @@ public class GroupController : ControllerBase
     [ProducesResponseType(typeof(Group), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
-    public async Task<IActionResult> GetAsync([FromRoute, NotNull] string id, [FromQuery] string locationArea = Defaults.Location)
+    public async Task<IActionResult> GetAsync([FromRoute, NotNull] string id)
     {
-        var entity = await groupService.FindAsync(locationArea, id);
+        var entity = await groupService.FindAsync(id);
         return new JsonResult(entity);
     }
 
     [HttpPost]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.Created)]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
-    public async Task<IActionResult> CreateAsync([FromBody] GroupCreateRequest request, [FromQuery] string locationArea = Defaults.Location)
+    public async Task<IActionResult> CreateAsync([FromBody] GroupCreateRequest request)
     {
-        var entity = request.ToEntity(locationArea);
+        var entity = request.ToEntity();
         await groupService.AddAsync(entity);
 
         return Created("groups", entity);
@@ -45,9 +44,9 @@ public class GroupController : ControllerBase
     [ProducesResponseType(typeof(Group), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
-    public async Task<IActionResult> UpdateAsync([FromRoute, NotNull] string id, [FromBody] GroupUpdateRequest request, [FromQuery] string locationArea = Defaults.Location)
+    public async Task<IActionResult> UpdateAsync([FromRoute, NotNull] string id, [FromBody] GroupUpdateRequest request)
     {
-        var entity = await groupService.FindAsync(locationArea, id);
+        var entity = await groupService.FindAsync(id);
 
         entity.Name = request.Name ?? entity.Name;
         entity.CapacityInAmps = request.CapacityInAmps ?? entity.CapacityInAmps;
@@ -61,9 +60,9 @@ public class GroupController : ControllerBase
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
-    public async Task<IActionResult> DeleteAsync([FromRoute, NotNull] string id, [FromQuery] string locationArea = Defaults.Location)
+    public async Task<IActionResult> DeleteAsync([FromRoute, NotNull] string id)
     {
-        await groupService.DeleteAsync(locationArea, id);
+        await groupService.DeleteAsync(id);
         return Ok();
     }
 }

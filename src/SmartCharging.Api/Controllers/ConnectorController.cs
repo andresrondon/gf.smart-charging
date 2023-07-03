@@ -36,11 +36,10 @@ public class ConnectorController : ControllerBase
     public async Task<IActionResult> CreateAsync(
         [FromRoute, NotNull] string groupId, 
         [FromRoute, NotNull] string stationId, 
-        [FromBody] ConnectorCreateRequest request, 
-        [FromQuery] string locationArea = Defaults.Location)
+        [FromBody] ConnectorCreateRequest request)
     {
         var entity = request.ToEntity();
-        await connectorService.AddAsync(locationArea, groupId, stationId, entity);
+        await connectorService.AddAsync(groupId, stationId, entity);
 
         return Created("connectors", entity);
     }
@@ -53,14 +52,13 @@ public class ConnectorController : ControllerBase
         [FromRoute, NotNull] string groupId, 
         [FromRoute, NotNull] string stationId, 
         [FromRoute, NotNull] int connectorId, 
-        [FromBody] ConnectorUpdateRequest request, 
-        [FromQuery] string locationArea = Defaults.Location)
+        [FromBody] ConnectorUpdateRequest request)
     {
         var entity = await connectorService.FindAsync(groupId, stationId, connectorId);
 
         entity.MaxCurrentInAmps = request.MaxCurrentInAmps ?? entity.MaxCurrentInAmps;
 
-        await connectorService.UpdateAsync(locationArea, groupId, stationId, entity);
+        await connectorService.UpdateAsync(groupId, stationId, entity);
 
         return new JsonResult(entity);
     }

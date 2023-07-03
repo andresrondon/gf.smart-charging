@@ -1,4 +1,5 @@
-﻿using SmartCharging.Lib.Models;
+﻿using SmartCharging.Lib.Constants;
+using SmartCharging.Lib.Models;
 
 namespace SmartCharging.Api.Requests;
 
@@ -8,12 +9,12 @@ public class GroupCreateRequest
 
     public int CapacityInAmps { get; set; }
 
-    public Group ToEntity(string locationArea)
+    public Group ToEntity()
     {
         return new Group()
         {
             Id = Guid.NewGuid().ToString(),
-            LocationArea = locationArea,
+            LocationArea = Defaults.Location,
             Name = Name,
             CapacityInAmps = CapacityInAmps
         };

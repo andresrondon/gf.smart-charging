@@ -1,4 +1,5 @@
-﻿using SmartCharging.Lib.Exceptions;
+﻿using SmartCharging.Lib.Constants;
+using SmartCharging.Lib.Exceptions;
 using SmartCharging.Lib.Models;
 using SmartCharging.Lib.Repositories.ChargeStations;
 using SmartCharging.Lib.Repositories.Groups;
@@ -16,10 +17,10 @@ public class ConnectorService : IConnectorService
         this.groupRepository = groupRepository;
     }
 
-    public async Task AddAsync(string location, string groupId, string stationId, Connector connector)
+    public async Task AddAsync(string groupId, string stationId, Connector connector)
     {
         // TODO: to refactor
-        var parentGroup = await groupRepository.FindAsync(groupId, location);
+        var parentGroup = await groupRepository.FindAsync(groupId, Defaults.Location);
         var parentStation = parentGroup.ChargeStations.FirstOrDefault(cs => cs.Id == stationId) ?? throw new ResourceNotFoundException("Charge Station not found.");
         // ---
 
@@ -47,10 +48,10 @@ public class ConnectorService : IConnectorService
         return GetConnectorOrThrow(parentStation, connectorId);
     }
 
-    public async Task UpdateAsync(string location, string groupId, string stationId, Connector connector)
+    public async Task UpdateAsync(string groupId, string stationId, Connector connector)
     {
         // TODO: to refactor
-        var parentGroup = await groupRepository.FindAsync(groupId, location);
+        var parentGroup = await groupRepository.FindAsync(groupId, Defaults.Location);
         var parentStation = parentGroup.ChargeStations.FirstOrDefault(cs => cs.Id == stationId) ?? throw new ResourceNotFoundException("Charge Station not found.");
         // ---
 

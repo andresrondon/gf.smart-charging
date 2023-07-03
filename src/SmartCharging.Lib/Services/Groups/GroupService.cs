@@ -1,4 +1,5 @@
-﻿using SmartCharging.Lib.Models;
+﻿using SmartCharging.Lib.Constants;
+using SmartCharging.Lib.Models;
 using SmartCharging.Lib.Repositories.ChargeStations;
 using SmartCharging.Lib.Repositories.Groups;
 
@@ -24,15 +25,15 @@ public class GroupService : IGroupService
         return groupRepository.AddAsync(group);
     }
 
-    public async Task DeleteAsync(string location, string id)
+    public async Task DeleteAsync(string id)
     {
         await stationRepository.BulkDeleteAsync(id);
-        await groupRepository.DeleteAsync(id, location);
+        await groupRepository.DeleteAsync(id, Defaults.Location);
     }
 
-    public Task<Group> FindAsync(string location, string id)
+    public Task<Group> FindAsync(string id)
     {
-        return groupRepository.FindAsync(id, location);
+        return groupRepository.FindAsync(id, Defaults.Location);
     }
 
     public Task UpdateAsync(Group group)

@@ -1,4 +1,5 @@
-﻿using SmartCharging.Lib.Models;
+﻿using SmartCharging.Lib.Constants;
+using SmartCharging.Lib.Models;
 using SmartCharging.Lib.Repositories.ChargeStations;
 using SmartCharging.Lib.Repositories.Groups;
 
@@ -15,10 +16,10 @@ public class ChargeStationService : IChargeStationService
         this.groupRepository = groupRepository;
     }
 
-    public async Task AddAsync(string location, ChargeStation station)
+    public async Task AddAsync(ChargeStation station)
     {
         // Validate
-        var group = await groupRepository.FindAsync(station.GroupId, location);
+        var group = await groupRepository.FindAsync(station.GroupId, Defaults.Location);
         BusinessRules
             .ValidateChargeStationUpdate(station, group)
             .ThrowIfInValid();
@@ -37,10 +38,10 @@ public class ChargeStationService : IChargeStationService
         return stationRepository.FindAsync(id, groupId);
     }
 
-    public async Task UpdateAsync(string location, ChargeStation station)
+    public async Task UpdateAsync(ChargeStation station)
     {
         // Validate
-        var group = await groupRepository.FindAsync(station.GroupId, location);
+        var group = await groupRepository.FindAsync(station.GroupId, Defaults.Location);
         BusinessRules
             .ValidateChargeStationUpdate(station, group)
             .ThrowIfInValid();
