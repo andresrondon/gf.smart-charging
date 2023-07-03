@@ -17,12 +17,10 @@ public class ConnectorService : IConnectorService
         this.groupRepository = groupRepository;
     }
 
-    public async Task AddAsync(string groupId, string stationId, Connector connector)
+    public async Task AddAsync(Connector connector, string groupId, string stationId)
     {
-        // TODO: to refactor
         var parentGroup = await groupRepository.FindAsync(groupId, Defaults.Location);
-        var parentStation = parentGroup.ChargeStations.FirstOrDefault(cs => cs.Id == stationId) ?? throw new ResourceNotFoundException("Charge Station not found.");
-        // ---
+        var parentStation = GetStationOrThrow(parentGroup, stationId);
 
         parentStation.Connectors.Add(connector);
 
@@ -48,13 +46,10 @@ public class ConnectorService : IConnectorService
         return GetConnectorOrThrow(parentStation, connectorId);
     }
 
-    public async Task UpdateAsync(string groupId, string stationId, Connector connector)
+    public async Task UpdateAsync(Connector connector, string groupId, string stationId)
     {
-        // TODO: to refactor
         var parentGroup = await groupRepository.FindAsync(groupId, Defaults.Location);
-        var parentStation = parentGroup.ChargeStations.FirstOrDefault(cs => cs.Id == stationId) ?? throw new ResourceNotFoundException("Charge Station not found.");
-        // ---
-
+        var parentStation = GetStationOrThrow(parentGroup, stationId);
         var oldConnector = GetConnectorOrThrow(parentStation, connector.Id);
 
         parentStation.Connectors.Remove(oldConnector);
@@ -66,6 +61,9 @@ public class ConnectorService : IConnectorService
 
         await stationRepository.UpdateAsync(parentStation!);
     }
+
+    private static ChargeStation GetStationOrThrow(Group parentGroup, string stationId)
+        => parentGroup.ChargeStations.FirstOrDefault(cs => cs.Id == stationId) ?? throw new ResourceNotFoundException("Charge Station not found.");
 
     private static Connector GetConnectorOrThrow(ChargeStation parentStation, int connectorId) 
         => parentStation.Connectors.FirstOrDefault(c => c.Id == connectorId) ?? throw new ResourceNotFoundException("Connector not found.");

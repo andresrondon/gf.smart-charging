@@ -58,9 +58,4 @@ public abstract class Repository<TEntity>
     {
         return container.DeleteItemAsync<TEntity>(id, new PartitionKey(partitionKey));
     }
-
-    public async Task BulkDeleteAsync(string partitionKey)
-    {
-        _ = await container.DeleteAllItemsByPartitionKeyStreamAsync(new PartitionKey(partitionKey));
-    }
 }

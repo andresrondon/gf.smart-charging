@@ -39,7 +39,7 @@ public class ConnectorController : ControllerBase
         [FromBody] ConnectorCreateRequest request)
     {
         var entity = request.ToEntity();
-        await connectorService.AddAsync(groupId, stationId, entity);
+        await connectorService.AddAsync(entity, groupId, stationId);
 
         return Created("connectors", entity);
     }
@@ -58,7 +58,7 @@ public class ConnectorController : ControllerBase
 
         entity.MaxCurrentInAmps = request.MaxCurrentInAmps ?? entity.MaxCurrentInAmps;
 
-        await connectorService.UpdateAsync(groupId, stationId, entity);
+        await connectorService.UpdateAsync(entity, groupId, stationId);
 
         return new JsonResult(entity);
     }
