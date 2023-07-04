@@ -7,6 +7,9 @@ using SmartCharging.Api.Requests;
 
 namespace SmartCharging.Api.Controllers;
 
+/// <summary>
+/// Controller for interacting with <see cref="ChargeStation"/> domain model.
+/// </summary>
 [ApiController]
 [Route("groups/{groupId}/stations")]
 [ApiVersion("1.0")]
@@ -19,6 +22,9 @@ public class ChargeStationController : ControllerBase
         this.stationService = stationService;
     }
 
+    /// <summary>
+    /// Performs a query to get a specific <see cref="ChargeStation"/>.
+    /// </summary>
     [HttpGet, Route("{stationId}")]
     [ProducesResponseType(typeof(ChargeStation), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
@@ -28,6 +34,9 @@ public class ChargeStationController : ControllerBase
         return new JsonResult(entity);
     }
 
+    /// <summary>
+    /// Sends a command to create a new <see cref="ChargeStation"/>.
+    /// </summary>
     [HttpPost]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.Created)]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
@@ -39,6 +48,9 @@ public class ChargeStationController : ControllerBase
         return Created("stations", entity);
     }
 
+    /// <summary>
+    /// Updates the specified <see cref="ChargeStation"/>.
+    /// </summary>
     [HttpPatch, Route("{stationId}")]
     [ProducesResponseType(typeof(ChargeStation), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
@@ -55,6 +67,9 @@ public class ChargeStationController : ControllerBase
         return new JsonResult(entity);
     }
 
+    /// <summary>
+    /// Deletes a <see cref="ChargeStation"/>.
+    /// </summary>
     [HttpDelete, Route("{stationId}")]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]

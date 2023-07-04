@@ -4,6 +4,9 @@ using SmartCharging.Lib.Models;
 
 namespace SmartCharging.Lib.Repositories.ChargeStations;
 
+/// <summary>
+/// A repository for CRUD operations on <see cref="ChargeStation"/>s. It adapts Azure Cosmos DB SDK by extending <see cref="Repository{TEntity}"/>.
+/// </summary>
 public class ChargeStationRepository : Repository<ChargeStation>, IChargeStationRepository
 {
     public ChargeStationRepository(IOptions<DatabaseSettings> databaseSettings) 
@@ -11,6 +14,7 @@ public class ChargeStationRepository : Repository<ChargeStation>, IChargeStation
     {
     }
 
+    /// <inheritdoc/>
     public async Task BulkDeleteAsync(string groupId)
     {
         // vvvvv Cosmos DB SDK Preview Version only vvvvv

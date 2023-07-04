@@ -5,6 +5,9 @@ using SmartCharging.Lib.Repositories.Groups;
 
 namespace SmartCharging.Lib.Services.Groups;
 
+/// <summary>
+/// A service class in charge of performing Business Logic related to <see cref="Group"/>s.
+/// </summary>
 public class GroupService : IGroupService
 {
     private readonly IGroupRepository groupRepository;
@@ -16,6 +19,7 @@ public class GroupService : IGroupService
         this.stationRepository = stationRepository;
     }
 
+    /// <inheritdoc/>
     public Task AddAsync(Group group)
     {
         BusinessRules
@@ -25,17 +29,20 @@ public class GroupService : IGroupService
         return groupRepository.AddAsync(group);
     }
 
+    /// <inheritdoc/>
     public async Task DeleteAsync(string id)
     {
         await stationRepository.BulkDeleteAsync(id);
         await groupRepository.DeleteAsync(id, Defaults.Location);
     }
 
+    /// <inheritdoc/>
     public Task<Group> FindAsync(string id)
     {
         return groupRepository.FindAsync(id, Defaults.Location);
     }
 
+    /// <inheritdoc/>
     public Task UpdateAsync(Group group)
     {
         BusinessRules

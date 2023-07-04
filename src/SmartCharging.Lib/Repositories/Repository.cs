@@ -4,6 +4,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SmartCharging.Lib.Repositories;
 
+/// <summary>
+/// An Adapter for CRUD operations on an Azure Cosmos DB Container.
+/// </summary>
+/// <typeparam name="TEntity">Entity model for each item to CRUD.</typeparam>
 public abstract class Repository<TEntity>
 {
     protected readonly Database database;

@@ -5,6 +5,9 @@ using SmartCharging.Lib.Models;
 
 namespace SmartCharging.Lib.Repositories.Groups;
 
+/// <summary>
+/// A repository for CRUD operations on <see cref="Group"/>s. It adapts Azure Cosmos DB SDK by extending <see cref="Repository{TEntity}"/>.
+/// </summary>
 public class GroupRepository : Repository<Group>, IGroupRepository
 {
     protected readonly Container chargeStationContainer;
@@ -14,6 +17,7 @@ public class GroupRepository : Repository<Group>, IGroupRepository
         chargeStationContainer = database.GetContainer(nameof(Group.ChargeStations));
     }
 
+    /// <inheritdoc/>
     public override async Task<Group> FindAsync(string id, string locationArea)
     {
         var group = await base.FindAsync(id, locationArea);

@@ -7,6 +7,9 @@ using SmartCharging.Api.Requests;
 
 namespace SmartCharging.Api.Controllers;
 
+/// <summary>
+/// Controller for interacting with <see cref="Connector"/> domain model.
+/// </summary>
 [ApiController]
 [Route("groups/{groupId}/stations/{stationId}/connectors")]
 [ApiVersion("1.0")]
@@ -19,6 +22,9 @@ public class ConnectorController : ControllerBase
         this.connectorService = connectorService;
     }
 
+    /// <summary>
+    /// Performs a query to get a specific <see cref="Connector"/>.
+    /// </summary>
     [HttpGet, Route("{connectorId}")]
     [ProducesResponseType(typeof(Connector), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
@@ -28,6 +34,9 @@ public class ConnectorController : ControllerBase
         return new JsonResult(entity);
     }
 
+    /// <summary>
+    /// Sends a command to create a new <see cref="Connector"/>.
+    /// </summary>
     [HttpPost]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.Created)]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
@@ -42,6 +51,9 @@ public class ConnectorController : ControllerBase
         return Created("connectors", entity);
     }
 
+    /// <summary>
+    /// Updates the specified <see cref="Connector"/>.
+    /// </summary>
     [HttpPatch, Route("{connectorId}")]
     [ProducesResponseType(typeof(Connector), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
@@ -61,6 +73,9 @@ public class ConnectorController : ControllerBase
         return new JsonResult(entity);
     }
 
+    /// <summary>
+    /// Deletes a <see cref="Connector"/>.
+    /// </summary>
     [HttpDelete, Route("{connectorId}")]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]

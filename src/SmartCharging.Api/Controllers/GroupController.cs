@@ -7,6 +7,9 @@ using SmartCharging.Api.Requests;
 
 namespace SmartCharging.Api.Controllers;
 
+/// <summary>
+/// Controller for interacting with <see cref="Group"/> domain model.
+/// </summary>
 [ApiController]
 [Route("groups")]
 [ApiVersion("1.0")]
@@ -19,6 +22,9 @@ public class GroupController : ControllerBase
         this.groupService = groupService;
     }
 
+    /// <summary>
+    /// Performs a query to get a specific <see cref="Group"/>.
+    /// </summary>
     [HttpGet, Route("{id}")]
     [ProducesResponseType(typeof(Group), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
@@ -28,6 +34,9 @@ public class GroupController : ControllerBase
         return new JsonResult(entity);
     }
 
+    /// <summary>
+    /// Sends a command to create a new <see cref="Group"/>.
+    /// </summary>
     [HttpPost]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.Created)]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
@@ -39,6 +48,9 @@ public class GroupController : ControllerBase
         return Created("groups", entity);
     }
 
+    /// <summary>
+    /// Updates the specified <see cref="Group"/>.
+    /// </summary>
     [HttpPatch, Route("{id}")]
     [ProducesResponseType(typeof(Group), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
@@ -55,6 +67,9 @@ public class GroupController : ControllerBase
         return new JsonResult(entity);
     }
 
+    /// <summary>
+    /// Deletes a <see cref="Group"/>.
+    /// </summary>
     [HttpDelete, Route("{id}")]
     [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]

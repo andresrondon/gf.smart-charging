@@ -6,6 +6,9 @@ using SmartCharging.Lib.Repositories.Groups;
 
 namespace SmartCharging.Lib.Services.Connectors;
 
+/// <summary>
+/// A service class in charge of performing Business Logic related to <see cref="Connector"/>s.
+/// </summary>
 public class ConnectorService : IConnectorService
 {
     private readonly IChargeStationRepository stationRepository;
@@ -17,6 +20,7 @@ public class ConnectorService : IConnectorService
         this.groupRepository = groupRepository;
     }
 
+    /// <inheritdoc/>
     public async Task AddAsync(Connector connector, string groupId, string stationId)
     {
         var parentGroup = await groupRepository.FindAsync(groupId, Defaults.Location);
@@ -31,6 +35,7 @@ public class ConnectorService : IConnectorService
         await stationRepository.UpdateAsync(parentStation!);
     }
 
+    /// <inheritdoc/>
     public async Task DeleteAsync(string groupId, string stationId, int connectorId)
     {
         var parentStation = await stationRepository.FindAsync(stationId, groupId);
@@ -40,12 +45,14 @@ public class ConnectorService : IConnectorService
         await stationRepository.UpdateAsync(parentStation);
     }
 
+    /// <inheritdoc/>
     public async Task<Connector> FindAsync(string groupId, string stationId, int connectorId)
     {
         var parentStation = await stationRepository.FindAsync(stationId, groupId);
         return GetConnectorOrThrow(parentStation, connectorId);
     }
 
+    /// <inheritdoc/>
     public async Task UpdateAsync(Connector connector, string groupId, string stationId)
     {
         var parentGroup = await groupRepository.FindAsync(groupId, Defaults.Location);
