@@ -15,11 +15,11 @@ Domain Model:
 - **Connector**: has integer Identifier unique within the context of a charge station with (possible range
 of values from 1 to 5), Max current in Amps (integer, value greater than zero, can be changed).
 
-Add Groups with the _/groups/_ route.
+Manage Groups with the _/groups/_ route.
 
-Add Charge Stations with the _/groups/{groupId}/stations/_ route.
+Manage Charge Stations with the _/groups/{groupId}/stations/_ route.
 
-Add Connectors with the _/groups/{groupId}/stations/{stationId}/connectors_.
+Manage Connectors with the _/groups/{groupId}/stations/{stationId}/connectors_.
 
 Alternatively, you can also add or update connectors directly when adding or updating Charge Stations.
 
