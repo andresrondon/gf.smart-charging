@@ -6,6 +6,7 @@ using SmartCharging.Lib.Repositories.Groups;
 using SmartCharging.Lib.Services.ChargeStations;
 using SmartCharging.Lib.Services.Connectors;
 using SmartCharging.Lib.Services.Groups;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +16,10 @@ builder.Services.AddControllers(o =>
     o.Filters.Add<HttpResponseExceptionFilter>();
 });
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
+});
 
 builder.Services.AddApiVersioning(o =>
 {
