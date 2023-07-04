@@ -16,27 +16,15 @@ public class ChargeStationServiceTests
     [Fact]
     public async Task ShouldAddNewChargeStation()
     {
-        var parentGroup = new Group
-        {
-            Id = Guid.NewGuid().ToString(),
-            LocationArea = Defaults.Location,
-            Name = "Group 1",
-            CapacityInAmps = 10
-        };
-        var station = new ChargeStation
-        {
-            Id = Guid.NewGuid().ToString(),
-            GroupId = parentGroup.Id,
-            Name = "Station 1",
-            Connectors = new List<Connector>()
-            {
-                new Connector { Id = 1, MaxCurrentInAmps = 1 }
-            }
-        };
-
+        // Arrange
+        var parentGroup = CreateGroupFake(capacityInAmps: 10);
+        var station = CreateChargeStationFake(parentGroup.Id);
         var service = BuildService(parentGroup);
+
+        // Act
         await service.AddAsync(station);
 
+        // Assert
         _groupRepositoryMock.Verify(m => m.FindAsync(station.GroupId, Defaults.Location), Times.Once());
         _chargeStationRepositoryMock.Verify(m => m.AddAsync(station), Times.Once());
     }
@@ -44,59 +32,44 @@ public class ChargeStationServiceTests
     [Fact]
     public async Task ShouldDeleteChargeStation()
     {
+        // Arrange
         var stationId = Guid.NewGuid().ToString();
         var groupId = Guid.NewGuid().ToString();
-
         var service = BuildService();
+
+        // Act
         await service.DeleteAsync(groupId, stationId);
 
+        // Assert
         _chargeStationRepositoryMock.Verify(m => m.DeleteAsync(stationId, groupId), Times.Once());
     }
 
     [Fact]
     public async Task ShouldFindChargeStation()
     {
-        var station = new ChargeStation
-        {
-            Id = Guid.NewGuid().ToString(),
-            GroupId = Guid.NewGuid().ToString(),
-            Name = "Station 1",
-            Connectors = new List<Connector>()
-            {
-                new Connector { Id = 1, MaxCurrentInAmps = 1 }
-            }
-        };
-
+        // Arrange
+        var station = CreateChargeStationFake();
         var service = BuildService(null, station);
+
+        // Act
         await service.FindAsync(station.GroupId, station.Id);
 
+        // Assert
         _chargeStationRepositoryMock.Verify(m => m.FindAsync(station.Id, station.GroupId), Times.Once());
     }
 
     [Fact]
     public async Task ShouldUpdateChargeStation()
     {
-        var parentGroup = new Group
-        {
-            Id = Guid.NewGuid().ToString(),
-            LocationArea = Defaults.Location,
-            Name = "Group 1",
-            CapacityInAmps = 10
-        };
-        var station = new ChargeStation
-        {
-            Id = Guid.NewGuid().ToString(),
-            GroupId = parentGroup.Id,
-            Name = "Station 1",
-            Connectors = new List<Connector>()
-            {
-                new Connector { Id = 1, MaxCurrentInAmps = 1 }
-            }
-        };
-
+        // Arrange
+        var parentGroup = CreateGroupFake(capacityInAmps: 10);
+        var station = CreateChargeStationFake(parentGroup.Id);
         var service = BuildService(parentGroup);
+
+        // Act
         await service.UpdateAsync(station);
 
+        // Assert
         _groupRepositoryMock.Verify(m => m.FindAsync(station.GroupId, Defaults.Location), Times.Once());
         _chargeStationRepositoryMock.Verify(m => m.UpdateAsync(station), Times.Once());
     }
@@ -104,22 +77,12 @@ public class ChargeStationServiceTests
     [Fact]
     public async Task ShouldNotAddNewChargeStationWithNoConnectors()
     {
-        var parentGroup = new Group
-        {
-            Id = Guid.NewGuid().ToString(),
-            LocationArea = Defaults.Location,
-            Name = "Group 1",
-            CapacityInAmps = 10
-        };
-        var station = new ChargeStation
-        {
-            Id = Guid.NewGuid().ToString(),
-            GroupId = parentGroup.Id,
-            Name = "Station 1",
-            Connectors = { }
-        };
-
+        // Arrange
+        var parentGroup = CreateGroupFake(capacityInAmps: 10);
+        var station = CreateChargeStationFake(parentGroup.Id, connectors: new List<Connector>());
         var service = BuildService(parentGroup);
+
+        // Act / Assert
         await Assert.ThrowsAsync<BusinessRulesValidationException>(() => service.AddAsync(station));
 
         _groupRepositoryMock.Verify(m => m.FindAsync(station.GroupId, Defaults.Location), Times.Once());
@@ -129,19 +92,11 @@ public class ChargeStationServiceTests
     [Fact]
     public async Task ShouldNotAddNewChargeStationWithMoreThanFiveConnectors()
     {
-        var parentGroup = new Group
-        {
-            Id = Guid.NewGuid().ToString(),
-            LocationArea = Defaults.Location,
-            Name = "Group 1",
-            CapacityInAmps = 10
-        };
-        var station = new ChargeStation
-        {
-            Id = Guid.NewGuid().ToString(),
-            GroupId = parentGroup.Id,
-            Name = "Station 1",
-            Connectors = 
+        // Arrange
+        var parentGroup = CreateGroupFake(capacityInAmps: 10);
+        var station = CreateChargeStationFake(
+            parentGroup.Id, 
+            connectors: new List<Connector>
             {
                 new Connector { Id = 1, MaxCurrentInAmps = 1 },
                 new Connector { Id = 2, MaxCurrentInAmps = 1 },
@@ -149,10 +104,11 @@ public class ChargeStationServiceTests
                 new Connector { Id = 4, MaxCurrentInAmps = 1 },
                 new Connector { Id = 5, MaxCurrentInAmps = 1 },
                 new Connector { Id = 6, MaxCurrentInAmps = 1 }
-            }
-        };
+            });
 
         var service = BuildService(parentGroup);
+        
+        // Act / Assert
         await Assert.ThrowsAsync<BusinessRulesValidationException>(() => service.AddAsync(station));
 
         _groupRepositoryMock.Verify(m => m.FindAsync(station.GroupId, Defaults.Location), Times.Once());
@@ -162,22 +118,12 @@ public class ChargeStationServiceTests
     [Fact]
     public async Task ShouldNotUpdateChargeStationWithNoConnectors()
     {
-        var parentGroup = new Group
-        {
-            Id = Guid.NewGuid().ToString(),
-            LocationArea = Defaults.Location,
-            Name = "Group 1",
-            CapacityInAmps = 10
-        };
-        var station = new ChargeStation
-        {
-            Id = Guid.NewGuid().ToString(),
-            GroupId = parentGroup.Id,
-            Name = "Station 1",
-            Connectors = { }
-        };
-
+        // Arrange
+        var parentGroup = CreateGroupFake(capacityInAmps: 10);
+        var station = CreateChargeStationFake(parentGroup.Id, connectors: new List<Connector>());
         var service = BuildService(parentGroup);
+
+        // Act / Assert
         await Assert.ThrowsAsync<BusinessRulesValidationException>(() => service.UpdateAsync(station));
 
         _groupRepositoryMock.Verify(m => m.FindAsync(station.GroupId, Defaults.Location), Times.Once());
@@ -187,19 +133,11 @@ public class ChargeStationServiceTests
     [Fact]
     public async Task ShouldNotUpdateChargeStationWithMoreThanFiveConnectors()
     {
-        var parentGroup = new Group
-        {
-            Id = Guid.NewGuid().ToString(),
-            LocationArea = Defaults.Location,
-            Name = "Group 1",
-            CapacityInAmps = 10
-        };
-        var station = new ChargeStation
-        {
-            Id = Guid.NewGuid().ToString(),
-            GroupId = parentGroup.Id,
-            Name = "Station 1",
-            Connectors = 
+        // Arrange
+        var parentGroup = CreateGroupFake(capacityInAmps: 10);
+        var station = CreateChargeStationFake(
+            parentGroup.Id,
+            connectors: new List<Connector>
             {
                 new Connector { Id = 1, MaxCurrentInAmps = 1 },
                 new Connector { Id = 2, MaxCurrentInAmps = 1 },
@@ -207,10 +145,11 @@ public class ChargeStationServiceTests
                 new Connector { Id = 4, MaxCurrentInAmps = 1 },
                 new Connector { Id = 5, MaxCurrentInAmps = 1 },
                 new Connector { Id = 6, MaxCurrentInAmps = 1 }
-            }
-        };
+            });
 
         var service = BuildService(parentGroup);
+        
+        // Act / Assert
         await Assert.ThrowsAsync<BusinessRulesValidationException>(() => service.UpdateAsync(station));
 
         _groupRepositoryMock.Verify(m => m.FindAsync(station.GroupId, Defaults.Location), Times.Once());
@@ -220,18 +159,11 @@ public class ChargeStationServiceTests
     [Fact]
     public async Task ShouldNotAddNewChargeStationIfGroupDoesNotExists()
     {
-        var station = new ChargeStation
-        {
-            Id = Guid.NewGuid().ToString(),
-            GroupId = "wrong group id",
-            Name = "Station 1",
-            Connectors = 
-            {
-                new Connector { Id = 1, MaxCurrentInAmps = 1 }
-            }
-        };
-
+        // Arrange
+        var station = CreateChargeStationFake(parentGroupId: "incorrect group id");
         var service = BuildService(parentGroup: null);
+
+        // Act / Assert
         await Assert.ThrowsAsync<ResourceNotFoundException>(() => service.AddAsync(station));
 
         _groupRepositoryMock.Verify(m => m.FindAsync(station.GroupId, Defaults.Location), Times.Once());
@@ -241,18 +173,11 @@ public class ChargeStationServiceTests
     [Fact]
     public async Task ShouldNotUpdateChargeStationIfGroupDoesNotExists()
     {
-        var station = new ChargeStation
-        {
-            Id = Guid.NewGuid().ToString(),
-            GroupId = "wrong group id",
-            Name = "Station 1",
-            Connectors = 
-            {
-                new Connector { Id = 1, MaxCurrentInAmps = 1 }
-            }
-        };
-
+        // Arrange
+        var station = CreateChargeStationFake(parentGroupId: "incorrect group id");
         var service = BuildService(parentGroup: null);
+
+        // Act / Assert
         await Assert.ThrowsAsync<ResourceNotFoundException>(() => service.UpdateAsync(station));
 
         _groupRepositoryMock.Verify(m => m.FindAsync(station.GroupId, Defaults.Location), Times.Once());
@@ -262,27 +187,20 @@ public class ChargeStationServiceTests
     [Fact]
     public async Task ShouldNotAddNewChargeStationIfConnectorsHaveDuplicateIds()
     {
-        var parentGroup = new Group
-        {
-            Id = Guid.NewGuid().ToString(),
-            LocationArea = Defaults.Location,
-            Name = "Group 1",
-            CapacityInAmps = 10
-        };
-        var station = new ChargeStation
-        {
-            Id = Guid.NewGuid().ToString(),
-            GroupId = parentGroup.Id,
-            Name = "Station 1",
-            Connectors = 
+        // Arrange
+        var parentGroup = CreateGroupFake(capacityInAmps: 10);
+        var station = CreateChargeStationFake(
+            parentGroup.Id,
+            connectors: new List<Connector>
             {
                 new Connector { Id = 1, MaxCurrentInAmps = 1 },
                 new Connector { Id = 2, MaxCurrentInAmps = 1 },
                 new Connector { Id = 2, MaxCurrentInAmps = 1 }
-            }
-        };
+            });
 
         var service = BuildService(parentGroup);
+        
+        // Act / Assert
         await Assert.ThrowsAsync<BusinessRulesValidationException>(() => service.AddAsync(station));
 
         _groupRepositoryMock.Verify(m => m.FindAsync(station.GroupId, Defaults.Location), Times.Once());
@@ -292,27 +210,20 @@ public class ChargeStationServiceTests
     [Fact]
     public async Task ShouldNotUpdateChargeStationIfConnectorsHaveDuplicateIds()
     {
-        var parentGroup = new Group
-        {
-            Id = Guid.NewGuid().ToString(),
-            LocationArea = Defaults.Location,
-            Name = "Group 1",
-            CapacityInAmps = 10
-        };
-        var station = new ChargeStation
-        {
-            Id = Guid.NewGuid().ToString(),
-            GroupId = parentGroup.Id,
-            Name = "Station 1",
-            Connectors = 
+        // Arrange
+        var parentGroup = CreateGroupFake(capacityInAmps: 10);
+        var station = CreateChargeStationFake(
+            parentGroup.Id,
+            connectors: new List<Connector>
             {
                 new Connector { Id = 1, MaxCurrentInAmps = 1 },
                 new Connector { Id = 2, MaxCurrentInAmps = 1 },
                 new Connector { Id = 2, MaxCurrentInAmps = 1 }
-            }
-        };
+            });
 
         var service = BuildService(parentGroup);
+        
+        // Act / Assert
         await Assert.ThrowsAsync<BusinessRulesValidationException>(() => service.UpdateAsync(station));
 
         _groupRepositoryMock.Verify(m => m.FindAsync(station.GroupId, Defaults.Location), Times.Once());
@@ -322,26 +233,19 @@ public class ChargeStationServiceTests
     [Fact]
     public async Task ShouldNotAddNewChargeStationIfConnectorsDoNotHavePositiveMaxCurrent()
     {
-        var parentGroup = new Group
-        {
-            Id = Guid.NewGuid().ToString(),
-            LocationArea = Defaults.Location,
-            Name = "Group 1",
-            CapacityInAmps = 10
-        };
-        var station = new ChargeStation
-        {
-            Id = Guid.NewGuid().ToString(),
-            GroupId = parentGroup.Id,
-            Name = "Station 1",
-            Connectors =
+        // Arrange
+        var parentGroup = CreateGroupFake(capacityInAmps: 10);
+        var station = CreateChargeStationFake(
+            parentGroup.Id,
+            connectors: new List<Connector>
             {
                 new Connector { Id = 1, MaxCurrentInAmps = 1 },
-                new Connector { Id = 2, MaxCurrentInAmps = 0 }
-            }
-        };
+                new Connector { Id = 2, MaxCurrentInAmps = 0 },
+            });
 
         var service = BuildService(parentGroup);
+        
+        // Act / Assert
         await Assert.ThrowsAsync<BusinessRulesValidationException>(() => service.AddAsync(station));
 
         _groupRepositoryMock.Verify(m => m.FindAsync(station.GroupId, Defaults.Location), Times.Once());
@@ -351,26 +255,19 @@ public class ChargeStationServiceTests
     [Fact]
     public async Task ShouldNotUpdateChargeStationIfConnectorsDoNotHavePositiveMaxCurrent()
     {
-        var parentGroup = new Group
-        {
-            Id = Guid.NewGuid().ToString(),
-            LocationArea = Defaults.Location,
-            Name = "Group 1",
-            CapacityInAmps = 10
-        };
-        var station = new ChargeStation
-        {
-            Id = Guid.NewGuid().ToString(),
-            GroupId = parentGroup.Id,
-            Name = "Station 1",
-            Connectors =
+        // Arrange
+        var parentGroup = CreateGroupFake(capacityInAmps: 10);
+        var station = CreateChargeStationFake(
+            parentGroup.Id,
+            connectors: new List<Connector>
             {
                 new Connector { Id = 1, MaxCurrentInAmps = 1 },
-                new Connector { Id = 2, MaxCurrentInAmps = 0 }
-            }
-        };
+                new Connector { Id = 2, MaxCurrentInAmps = 0 },
+            });
 
         var service = BuildService(parentGroup);
+        
+        // Act / Assert
         await Assert.ThrowsAsync<BusinessRulesValidationException>(() => service.UpdateAsync(station));
 
         _groupRepositoryMock.Verify(m => m.FindAsync(station.GroupId, Defaults.Location), Times.Once());
@@ -380,40 +277,26 @@ public class ChargeStationServiceTests
     [Fact]
     public async Task ShouldNotAddNewChargeStationIfTheSumOfItsConnectorsMaxCurrentExceedsGroupsCapacity()
     {
-        string groupId = Guid.NewGuid().ToString();
-        var parentGroup = new Group
-        {
-            Id = groupId,
-            LocationArea = Defaults.Location,
-            Name = "Group 1",
-            CapacityInAmps = 10,
-            ChargeStations =
-            {
-                new ChargeStation
+        // Arrange
+        var parentGroup = CreateGroupFake(capacityInAmps: 10);
+        parentGroup.ChargeStations.Add(
+            CreateChargeStationFake(
+                parentGroup.Id,
+                connectors: new List<Connector>
                 {
-                    GroupId = groupId,
-                    Id = Guid.NewGuid().ToString(),
-                    Name = "Station 1",
-                    Connectors =
-                    {
-                        new Connector { Id = 1, MaxCurrentInAmps = 8 }
-                    }
-                }
-            }
-        };
-        var station = new ChargeStation
-        {
-            Id = Guid.NewGuid().ToString(),
-            GroupId = parentGroup.Id,
-            Name = "Station 2",
-            Connectors = 
+                    new Connector { Id = 1, MaxCurrentInAmps = 8 },
+                }));
+        var station = CreateChargeStationFake(
+            parentGroup.Id,
+            connectors: new List<Connector>
             {
                 new Connector { Id = 1, MaxCurrentInAmps = 1 },
-                new Connector { Id = 2, MaxCurrentInAmps = 2 }
-            }
-        };
+                new Connector { Id = 2, MaxCurrentInAmps = 2 },
+            });
 
         var service = BuildService(parentGroup);
+
+        // Act / Assert
         await Assert.ThrowsAsync<BusinessRulesValidationException>(() => service.AddAsync(station));
 
         _groupRepositoryMock.Verify(m => m.FindAsync(station.GroupId, Defaults.Location), Times.Once());
@@ -423,40 +306,27 @@ public class ChargeStationServiceTests
     [Fact]
     public async Task ShouldNotUpdateChargeStationIfTheSumOfItsConnectorsMaxCurrentExceedsGroupsCapacity()
     {
-        string groupId = Guid.NewGuid().ToString();
-        var parentGroup = new Group
-        {
-            Id = groupId,
-            LocationArea = Defaults.Location,
-            Name = "Group 1",
-            CapacityInAmps = 10,
-            ChargeStations =
-            {
-                new ChargeStation
+        // Arrange
+        var stationId = Guid.NewGuid().ToString();
+        var parentGroup = CreateGroupFake(capacityInAmps: 10);
+        parentGroup.ChargeStations.Add(
+            CreateChargeStationFake(
+                parentGroup.Id,
+                connectors: new List<Connector>
                 {
-                    GroupId = groupId,
-                    Id = Guid.NewGuid().ToString(),
-                    Name = "Station 1",
-                    Connectors =
-                    {
-                        new Connector { Id = 1, MaxCurrentInAmps = 8 }
-                    }
-                }
-            }
-        };
-        var station = new ChargeStation
-        {
-            Id = Guid.NewGuid().ToString(),
-            GroupId = parentGroup.Id,
-            Name = "Station 2",
-            Connectors =
+                    new Connector { Id = 1, MaxCurrentInAmps = 8 },
+                }));
+        var station = CreateChargeStationFake(
+            parentGroup.Id,
+            connectors: new List<Connector>
             {
-                new Connector { Id = 1, MaxCurrentInAmps = 1 },
-                new Connector { Id = 2, MaxCurrentInAmps = 2 }
-            }
-        };
+                new Connector { Id = 1, MaxCurrentInAmps = 8 },
+                new Connector { Id = 2, MaxCurrentInAmps = 3 },
+            });
 
         var service = BuildService(parentGroup);
+
+        // Act / Assert
         await Assert.ThrowsAsync<BusinessRulesValidationException>(() => service.UpdateAsync(station));
 
         _groupRepositoryMock.Verify(m => m.FindAsync(station.GroupId, Defaults.Location), Times.Once());
@@ -504,5 +374,30 @@ public class ChargeStationServiceTests
         }
 
         return new ChargeStationService(_chargeStationRepositoryMock.Object, _groupRepositoryMock.Object);
+    }
+
+    private static Group CreateGroupFake(int capacityInAmps = 10)
+    {
+        return new Group
+        {
+            Id = Guid.NewGuid().ToString(),
+            LocationArea = Defaults.Location,
+            Name = "Group 1",
+            CapacityInAmps = capacityInAmps
+        };
+    }
+
+    private static ChargeStation CreateChargeStationFake(string? parentGroupId = null, ICollection<Connector>? connectors = null)
+    {
+        return new ChargeStation
+        {
+            Id = Guid.NewGuid().ToString(),
+            GroupId = parentGroupId ?? Guid.NewGuid().ToString(),
+            Name = "Station 1",
+            Connectors = connectors ?? new List<Connector>()
+            {
+                new Connector { Id = 1, MaxCurrentInAmps = 1 }
+            }
+        };
     }
 }

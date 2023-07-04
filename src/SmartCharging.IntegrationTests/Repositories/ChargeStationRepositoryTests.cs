@@ -23,7 +23,7 @@ public class ChargeStationRepositoryTests : IAsyncLifetime
     public async Task ShouldCreateChargeStation()
     {
         // Arrange
-        var entity = CreateFakeChargeStation();
+        var entity = CreateChargeStationFake();
         using var scope = serviceProvider.CreateScope();
         var repo = scope.ServiceProvider.GetService<ChargeStationRepository>()!;
 
@@ -39,7 +39,7 @@ public class ChargeStationRepositoryTests : IAsyncLifetime
     public async Task ShouldFindChargeStation()
     {
         // Arrange
-        var entity = CreateFakeChargeStation();
+        var entity = CreateChargeStationFake();
         using var scope = serviceProvider.CreateScope();
         var repo = scope.ServiceProvider.GetService<ChargeStationRepository>()!;
         await repo.AddAsync(entity);
@@ -56,7 +56,7 @@ public class ChargeStationRepositoryTests : IAsyncLifetime
     public async Task ShouldUpdateChargeStation()
     {
         // Arrange
-        var entity = CreateFakeChargeStation();
+        var entity = CreateChargeStationFake();
         using var scope = serviceProvider.CreateScope();
         var repo = scope.ServiceProvider.GetService<ChargeStationRepository>()!;
         await repo.AddAsync(entity);
@@ -74,7 +74,7 @@ public class ChargeStationRepositoryTests : IAsyncLifetime
     public async Task ShouldDeleteChargeStation()
     {
         // Arrange
-        var entity = CreateFakeChargeStation();
+        var entity = CreateChargeStationFake();
         using var scope = serviceProvider.CreateScope();
         var repo = scope.ServiceProvider.GetService<ChargeStationRepository>()!;
         var result = await repo.AddAsync(entity);
@@ -90,7 +90,7 @@ public class ChargeStationRepositoryTests : IAsyncLifetime
     public async Task ShouldThrowValidationExceptionIfAddingChargeStationWithNoConnectors()
     {
         // Arrange
-        var entity = CreateFakeChargeStation();
+        var entity = CreateChargeStationFake();
         entity.Connectors = new List<Connector>();
         using var scope = serviceProvider.CreateScope();
         var repo = scope.ServiceProvider.GetService<ChargeStationRepository>()!;
@@ -106,7 +106,7 @@ public class ChargeStationRepositoryTests : IAsyncLifetime
     public async Task ShouldThrowValidationExceptionIfUpdatingChargeStationWithNoConnectors()
     {
         // Arrange
-        var entity = CreateFakeChargeStation();
+        var entity = CreateChargeStationFake();
         using var scope = serviceProvider.CreateScope();
         var repo = scope.ServiceProvider.GetService<ChargeStationRepository>()!;
         await repo.AddAsync(entity);
@@ -120,7 +120,7 @@ public class ChargeStationRepositoryTests : IAsyncLifetime
         await Assert.ThrowsAsync<ValidationException>(() => task);
     }
 
-    private static ChargeStation CreateFakeChargeStation()
+    private static ChargeStation CreateChargeStationFake()
     {
         return new ChargeStation
         {

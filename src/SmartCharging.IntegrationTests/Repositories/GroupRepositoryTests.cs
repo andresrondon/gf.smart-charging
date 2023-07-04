@@ -23,7 +23,7 @@ public class GroupRepositoryTests : IAsyncLifetime
     public async Task ShouldCreateGroup()
     {
         // Arrange
-        var entity = CreateFakeGroup();
+        var entity = CreateGroupFake();
         using var scope = serviceProvider.CreateScope();
         var repo = scope.ServiceProvider.GetService<GroupRepository>()!;
 
@@ -39,7 +39,7 @@ public class GroupRepositoryTests : IAsyncLifetime
     public async Task ShouldFindGroup()
     {
         // Arrange
-        var entity = CreateFakeGroup();
+        var entity = CreateGroupFake();
         using var scope = serviceProvider.CreateScope();
         var repo = scope.ServiceProvider.GetService<GroupRepository>()!;
         await repo.AddAsync(entity);
@@ -56,7 +56,7 @@ public class GroupRepositoryTests : IAsyncLifetime
     public async Task ShouldUpdateGroup()
     {
         // Arrange
-        var entity = CreateFakeGroup();
+        var entity = CreateGroupFake();
         using var scope = serviceProvider.CreateScope();
         var repo = scope.ServiceProvider.GetService<GroupRepository>()!;
         await repo.AddAsync(entity);
@@ -74,7 +74,7 @@ public class GroupRepositoryTests : IAsyncLifetime
     public async Task ShouldDeleteGroup()
     {
         // Arrange
-        var entity = CreateFakeGroup();
+        var entity = CreateGroupFake();
         using var scope = serviceProvider.CreateScope();
         var repo = scope.ServiceProvider.GetService<GroupRepository>()!;
         var result = await repo.AddAsync(entity);
@@ -90,7 +90,7 @@ public class GroupRepositoryTests : IAsyncLifetime
     public async Task ShouldThrowValidationExceptionIfAddingGroupWithZeroOrLessCapacity()
     {
         // Arrange
-        var entity = CreateFakeGroup(capacityInAmps: 0);
+        var entity = CreateGroupFake(capacityInAmps: 0);
         using var scope = serviceProvider.CreateScope();
         var repo = scope.ServiceProvider.GetService<GroupRepository>()!;
 
@@ -105,7 +105,7 @@ public class GroupRepositoryTests : IAsyncLifetime
     public async Task ShouldThrowValidationExceptionIfUpdatingGroupWithZeroOrLessCapacity()
     {
         // Arrange
-        var entity = CreateFakeGroup();
+        var entity = CreateGroupFake();
         using var scope = serviceProvider.CreateScope();
         var repo = scope.ServiceProvider.GetService<GroupRepository>()!;
         await repo.AddAsync(entity);
@@ -119,7 +119,7 @@ public class GroupRepositoryTests : IAsyncLifetime
         await Assert.ThrowsAsync<ValidationException>(() => task);
     }
 
-    private static Group CreateFakeGroup(int capacityInAmps = 10)
+    private static Group CreateGroupFake(int capacityInAmps = 10)
     {
         return new Group
         {

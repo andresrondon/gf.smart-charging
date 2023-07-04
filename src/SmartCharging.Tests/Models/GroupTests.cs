@@ -2,7 +2,7 @@
 using SmartCharging.Lib.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace SmartCharging.Api.Tests.Models
+namespace SmartCharging.Tests.Models
 {
     public class GroupTests
     {

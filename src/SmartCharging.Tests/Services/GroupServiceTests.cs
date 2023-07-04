@@ -4,9 +4,7 @@ using SmartCharging.Lib.Exceptions;
 using SmartCharging.Lib.Models;
 using SmartCharging.Lib.Repositories.ChargeStations;
 using SmartCharging.Lib.Repositories.Groups;
-using SmartCharging.Lib.Services.ChargeStations;
 using SmartCharging.Lib.Services.Groups;
-using System.ComponentModel.DataAnnotations;
 
 namespace SmartCharging.Tests.Services;
 
@@ -18,28 +16,28 @@ public class GroupServiceTests
     [Fact]
     public async Task ShouldAddNewGroup()
     {
-        var parentGroup = new Group
-        {
-            Id = Guid.NewGuid().ToString(),
-            LocationArea = Defaults.Location,
-            Name = "Group 1",
-            CapacityInAmps = 10
-        };
-
+        // Arrange
+        var group = CreateGroupFake();
         var service = BuildService();
-        await service.AddAsync(parentGroup);
 
-        _groupRepositoryMock.Verify(m => m.AddAsync(parentGroup), Times.Once());
+        // Act
+        await service.AddAsync(group);
+
+        // Assert
+        _groupRepositoryMock.Verify(m => m.AddAsync(group), Times.Once());
     }
 
     [Fact]
     public async Task ShouldDeleteGroupIncludingChildStations()
     {
+        // Arrange
         var groupId = Guid.NewGuid().ToString();
-
         var service = BuildService();
+
+        // Act
         await service.DeleteAsync(groupId);
 
+        // Assert
         _groupRepositoryMock.Verify(m => m.DeleteAsync(groupId, Defaults.Location), Times.Once());
         _chargeStationRepositoryMock.Verify(m => m.BulkDeleteAsync(groupId), Times.Once());
     }
@@ -47,15 +45,11 @@ public class GroupServiceTests
     [Fact]
     public async Task ShouldFindGroup()
     {
-        var group = new Group
-        {
-            Id = Guid.NewGuid().ToString(),
-            LocationArea = Defaults.Location,
-            Name = "Group 1",
-            CapacityInAmps = 10
-        };
-
+        // Arrange
+        var group = CreateGroupFake();
         var service = BuildService(group);
+
+        // Act
         await service.FindAsync(group.Id);
 
         _groupRepositoryMock.Verify(m => m.FindAsync(group.Id, Defaults.Location), Times.Once());
@@ -64,15 +58,11 @@ public class GroupServiceTests
     [Fact]
     public async Task ShouldUpdateGroup()
     {
-        var group = new Group
-        {
-            Id = Guid.NewGuid().ToString(),
-            LocationArea = Defaults.Location,
-            Name = "Group 1",
-            CapacityInAmps = 10
-        };
-
+        // Arrange
+        var group = CreateGroupFake();
         var service = BuildService();
+
+        // Act
         await service.UpdateAsync(group);
 
         _groupRepositoryMock.Verify(m => m.UpdateAsync(group), Times.Once());
@@ -81,15 +71,11 @@ public class GroupServiceTests
     [Fact]
     public async Task ShouldNotAddNewGroupIfCapacityIsNotAPositiveInteger()
     {
-        var group = new Group
-        {
-            Id = Guid.NewGuid().ToString(),
-            LocationArea = Defaults.Location,
-            Name = "Group 1",
-            CapacityInAmps = 0
-        };
-
+        // Arrange
+        var group = CreateGroupFake(capacityInAmps: 0);
         var service = BuildService();
+
+        // Act / Assert
         await Assert.ThrowsAsync<BusinessRulesValidationException>(() => service.AddAsync(group));
 
         _groupRepositoryMock.Verify(m => m.AddAsync(group), Times.Never());
@@ -98,15 +84,11 @@ public class GroupServiceTests
     [Fact]
     public async Task ShouldNotUpdateGroupIfCapacityIsNotAPositiveInteger()
     {
-        var group = new Group
-        {
-            Id = Guid.NewGuid().ToString(),
-            LocationArea = Defaults.Location,
-            Name = "Group 1",
-            CapacityInAmps = 0
-        };
-
+        // Arrange
+        var group = CreateGroupFake(capacityInAmps: 0);
         var service = BuildService();
+
+        // Act / Assert
         await Assert.ThrowsAsync<BusinessRulesValidationException>(() => service.UpdateAsync(group));
 
         _groupRepositoryMock.Verify(m => m.UpdateAsync(group), Times.Never());
@@ -115,43 +97,38 @@ public class GroupServiceTests
     [Fact]
     public async Task ShouldNotUpdateGroupIfCapacityIsLowerThanTheSumOfItsConnectorsMaxCurrent()
     {
-        string groupId = Guid.NewGuid().ToString();
-        var parentGroup = new Group
+        // Arrange
+        var group = CreateGroupFake(capacityInAmps: 0);
+        group.ChargeStations = new List<ChargeStation>
         {
-            Id = groupId,
-            LocationArea = Defaults.Location,
-            Name = "Group 1",
-            CapacityInAmps = 10,
-            ChargeStations =
+            new ChargeStation
             {
-                new ChargeStation
+                GroupId = group.Id,
+                Id = Guid.NewGuid().ToString(),
+                Name = "Station 1",
+                Connectors =
                 {
-                    GroupId = groupId,
-                    Id = Guid.NewGuid().ToString(),
-                    Name = "Station 1",
-                    Connectors =
-                    {
-                        new Connector { Id = 1, MaxCurrentInAmps = 8 }
-                    }
-                },
-                new ChargeStation
+                    new Connector { Id = 1, MaxCurrentInAmps = 8 }
+                }
+            },
+            new ChargeStation
+            {
+                Id = Guid.NewGuid().ToString(),
+                GroupId = group.Id,
+                Name = "Station 2",
+                Connectors =
                 {
-                    Id = Guid.NewGuid().ToString(),
-                    GroupId = groupId,
-                    Name = "Station 2",
-                    Connectors =
-                    {
-                        new Connector { Id = 1, MaxCurrentInAmps = 1 },
-                        new Connector { Id = 2, MaxCurrentInAmps = 2 }
-                    }
+                    new Connector { Id = 1, MaxCurrentInAmps = 1 },
+                    new Connector { Id = 2, MaxCurrentInAmps = 2 }
                 }
             }
         };
-
         var service = BuildService();
-        await Assert.ThrowsAsync<BusinessRulesValidationException>(() => service.UpdateAsync(parentGroup));
 
-        _groupRepositoryMock.Verify(m => m.UpdateAsync(parentGroup), Times.Never());
+        // Act / Assert
+        await Assert.ThrowsAsync<BusinessRulesValidationException>(() => service.UpdateAsync(group));
+
+        _groupRepositoryMock.Verify(m => m.UpdateAsync(group), Times.Never());
     }
 
     private GroupService BuildService(Group? expectedResult = null)
@@ -186,5 +163,16 @@ public class GroupServiceTests
         }
 
         return new GroupService(_groupRepositoryMock.Object, _chargeStationRepositoryMock.Object);
+    }
+
+    private static Group CreateGroupFake(int capacityInAmps = 10)
+    {
+        return new Group
+        {
+            Id = Guid.NewGuid().ToString(),
+            LocationArea = Defaults.Location,
+            Name = "Group 1",
+            CapacityInAmps = capacityInAmps
+        };
     }
 }
