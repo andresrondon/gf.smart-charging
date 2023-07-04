@@ -19,7 +19,7 @@ Manage Groups with the _/groups/_ route.
 
 Manage Charge Stations with the _/groups/{groupId}/stations/_ route.
 
-Manage Connectors with the _/groups/{groupId}/stations/{stationId}/connectors_.
+Manage Connectors with the _/groups/{groupId}/stations/{stationId}/connectors_ route.
 
 Alternatively, you can also add or update connectors directly when adding or updating Charge Stations.
 
