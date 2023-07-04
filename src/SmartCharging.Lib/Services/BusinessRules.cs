@@ -12,6 +12,11 @@ internal static class BusinessRules
     {
         var errorList = new ValidationMessageList();
 
+        if (group.CapacityInAmps <= 0)
+        {
+            errorList.Add($"{nameof(Group.CapacityInAmps)} must be greater than 0.");
+        }
+
         var maxCurrentSum = group.ChargeStations.Sum(cs => cs.Connectors.Sum(c => c.MaxCurrentInAmps));
         if (maxCurrentSum > group.CapacityInAmps)
         {
@@ -65,7 +70,12 @@ internal static class BusinessRules
 
         if (station.Connectors.DistinctBy(c => c.Id).Count() != station.Connectors.Count)
         {
-            errorList.Add($"Connector Ids must be unique.");
+            errorList.Add("Connector Ids must be unique.");
+        }
+
+        if (station.Connectors.Any(c => c.MaxCurrentInAmps <= 0))
+        {
+            errorList.Add($"{nameof(Connector.MaxCurrentInAmps)} must be greater than 0.");
         }
 
         var maxCurrentSum = parentGroup.ChargeStations.Where(cs => cs.Id != station.Id).Sum(cs => cs.Connectors.Sum(c => c.MaxCurrentInAmps));

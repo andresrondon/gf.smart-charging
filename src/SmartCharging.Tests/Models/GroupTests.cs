@@ -1,4 +1,5 @@
-﻿using SmartCharging.Lib.Models;
+﻿using SmartCharging.Lib.Constants;
+using SmartCharging.Lib.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace SmartCharging.Api.Tests.Models
@@ -11,7 +12,7 @@ namespace SmartCharging.Api.Tests.Models
             var group = new Group
             {
                 Id = Guid.NewGuid().ToString(),
-                PartitionKey = Guid.NewGuid().ToString(),
+                LocationArea = Defaults.Location,
                 Name = "Group 1",
                 CapacityInAmps = 0
             };
@@ -21,6 +22,5 @@ namespace SmartCharging.Api.Tests.Models
                 Validator.ValidateObject(group, new ValidationContext(group), true);
             });
         }
-
     }
 }

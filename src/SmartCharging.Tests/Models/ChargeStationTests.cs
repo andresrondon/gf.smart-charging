@@ -30,5 +30,21 @@ namespace SmartCharging.Api.Tests.Models
             });
         }
 
+        [Fact]
+        public void ThrowsValidationExceptionWhenHasNoConnectors()
+        {
+            var station = new ChargeStation
+            {
+                Id = Guid.NewGuid().ToString(),
+                GroupId = Guid.NewGuid().ToString(),
+                Name = "Charge Station 1",
+                Connectors = { }
+            };
+
+            Assert.Throws<ValidationException>(() =>
+            {
+                Validator.ValidateObject(station, new ValidationContext(station), true);
+            });
+        }
     }
 }

@@ -20,4 +20,18 @@ public class ConnectorTests
         });
     }
 
+    [Fact]
+    public void ThrowsValidationExceptionWhenIdGreaterThanFive()
+    {
+        var connector = new Connector
+        {
+            Id = 6,
+            MaxCurrentInAmps = 1
+        };
+
+        Assert.Throws<ValidationException>(() =>
+        {
+            Validator.ValidateObject(connector, new ValidationContext(connector), true);
+        });
+    }
 }
