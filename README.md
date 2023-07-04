@@ -1,10 +1,13 @@
 # GreenFlux Smart Charging API
 **Assignment Version 14**
 
+## Overview
 This API exposes a simplified smart charging domain.
 
 Domain Model:
-[Domain model](documentation/domainmodel.png)
+
+![Domain model](documentation/domainmodel.png)
+
 - **Group**: has a unique Identifier (cannot be changed), Name (can be changed), Capacity in Amps
 (integer, value greater than zero, can be changed). A Group can contain multiple charge stations.
 - **Charge station**: has a unique Identifier (cannot be changed), Name (can be changed), and Connectors
@@ -22,7 +25,7 @@ Alternatively, you can also add or update connectors directly when adding or upd
 
 ## How To Run Locally
 ### Pre-requisites
-1. dotnetcore 7.0 or higher
+1. .NET Core (+SDK) 7.0 or higher. [Download here](https://dotnet.microsoft.com/en-us/download).
 
 ### Step by step
 1. Execute the _run.sh_ shell script located at the root folder of the repo. Alternatively you can run `dotnet run --project src/SmartCharging.Api --launch-profile http` in your terminal or console.
