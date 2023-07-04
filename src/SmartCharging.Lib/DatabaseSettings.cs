@@ -2,7 +2,7 @@
 
 public class DatabaseSettings
 {
-    public string AccountEndpoint { get; set; }
-    public string AuthKey { get; set; }
-    public string DatabaseId { get; set; }
+    public required string AccountEndpoint { get; set; }
+    public required string AuthKey { get; set; }
+    public required string DatabaseId { get; set; }
 }

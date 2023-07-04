@@ -26,7 +26,7 @@ public abstract class Repository<TEntity>
 
     public async Task<TEntity> AddAsync(TEntity entity)
     {
-        Validator.ValidateObject(entity, new ValidationContext(entity), validateAllProperties: true);
+        Validator.ValidateObject(entity!, new ValidationContext(entity!), validateAllProperties: true);
         var response = await container.CreateItemAsync(entity);
         return response.Resource;
     }
@@ -53,7 +53,7 @@ public abstract class Repository<TEntity>
 
     public async Task<TEntity> UpdateAsync(TEntity entity)
     {
-        Validator.ValidateObject(entity, new ValidationContext(entity), validateAllProperties: true);
+        Validator.ValidateObject(entity!, new ValidationContext(entity!), validateAllProperties: true);
         var response = await container.UpsertItemAsync(entity);
         return response.Resource;
     }

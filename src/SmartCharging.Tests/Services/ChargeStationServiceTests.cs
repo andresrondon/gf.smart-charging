@@ -10,8 +10,8 @@ namespace SmartCharging.Tests.Services;
 
 public class ChargeStationServiceTests
 {
-    private Mock<IChargeStationRepository> _chargeStationRepositoryMock;
-    private Mock<IGroupRepository> _groupRepositoryMock;
+    private Mock<IChargeStationRepository> _chargeStationRepositoryMock = new();
+    private Mock<IGroupRepository> _groupRepositoryMock = new();
 
     [Fact]
     public async Task ShouldAddNewChargeStation()

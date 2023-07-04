@@ -24,17 +24,10 @@ public class ChargeStationRepository : Repository<ChargeStation>, IChargeStation
             .Where(x => x.GroupId == groupId)
             .ToFeedIterator();
 
-        var results = new List<ChargeStation>();
-        var deleteTasks = new List<Task>();
         while (iterator.HasMoreResults)
         {
             var response = (await iterator.ReadNextAsync()).ToList();
-            foreach (var item in response)
-            {
-                deleteTasks.Add(container.DeleteItemAsync<ChargeStation>(item.Id, new Microsoft.Azure.Cosmos.PartitionKey(item.Id)));
-            }
-
-            Task.WaitAll(deleteTasks.ToArray());
+            Task.WaitAll(response.Select(x => DeleteAsync(x.Id, x.GroupId)).ToArray());
         }
     }
 }

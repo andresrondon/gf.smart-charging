@@ -21,7 +21,6 @@ public class GroupController : ControllerBase
 
     [HttpGet, Route("{id}")]
     [ProducesResponseType(typeof(Group), (int)HttpStatusCode.OK)]
-    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
     public async Task<IActionResult> GetAsync([FromRoute, NotNull] string id)
     {

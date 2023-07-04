@@ -3,7 +3,6 @@ using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using SmartCharging.Lib.Models;
 using SmartCharging.Lib.Services.Connectors;
-using SmartCharging.Lib.Constants;
 using SmartCharging.Api.Requests;
 
 namespace SmartCharging.Api.Controllers;
@@ -22,7 +21,6 @@ public class ConnectorController : ControllerBase
 
     [HttpGet, Route("{connectorId}")]
     [ProducesResponseType(typeof(Connector), (int)HttpStatusCode.OK)]
-    [ProducesResponseType(typeof(IActionResult), (int)HttpStatusCode.PreconditionFailed)]
     [ProducesResponseType(typeof(NotFoundResult), (int)HttpStatusCode.NotFound)]
     public async Task<IActionResult> GetAsync([FromRoute, NotNull] string groupId, [FromRoute, NotNull] string stationId, [FromRoute, NotNull] int connectorId)
     {
