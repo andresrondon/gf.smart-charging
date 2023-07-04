@@ -164,13 +164,13 @@ public class GroupServiceTests
         _groupRepositoryMock = new Mock<IGroupRepository>();
         _groupRepositoryMock
             .Setup(m => m.AddAsync(It.IsAny<Group>()))
-            .Returns(Task.CompletedTask);
+            .Returns(Task.FromResult(It.IsAny<Group>()));
         _groupRepositoryMock
             .Setup(m => m.DeleteAsync(It.IsAny<string>(), It.IsAny<string>()))
             .Returns(Task.CompletedTask);
         _groupRepositoryMock
             .Setup(m => m.UpdateAsync(It.IsAny<Group>()))
-            .Returns(Task.CompletedTask);
+            .Returns(Task.FromResult(It.IsAny<Group>()));
         
         if (expectedResult is not null)
         {

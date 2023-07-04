@@ -416,7 +416,7 @@ public class ConnectorServiceTests
         _chargeStationRepositoryMock = new Mock<IChargeStationRepository>();
         _chargeStationRepositoryMock
             .Setup(m => m.UpdateAsync(It.IsAny<ChargeStation>()))
-            .Returns(Task.CompletedTask);
+            .Returns(Task.FromResult(It.IsAny<ChargeStation>()));
 
         if (parentStation is not null)
         {

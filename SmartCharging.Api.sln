@@ -5,9 +5,11 @@ VisualStudioVersion = 17.1.32421.90
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartCharging.Api", "src\SmartCharging.Api\SmartCharging.Api.csproj", "{40EE5562-E48F-40A4-BE0C-DD6F81C02E85}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartCharging.Lib", "src\SmartCharging.Lib\SmartCharging.Lib.csproj", "{7A5ABAEF-B817-4F92-A418-49C5EFF84E02}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartCharging.Lib", "src\SmartCharging.Lib\SmartCharging.Lib.csproj", "{7A5ABAEF-B817-4F92-A418-49C5EFF84E02}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartCharging.Tests", "src\SmartCharging.Tests\SmartCharging.Tests.csproj", "{36289A38-F2D3-4CAC-9B28-34C57666EFA2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartCharging.IntegrationTests", "src\SmartCharging.IntegrationTests\SmartCharging.IntegrationTests.csproj", "{5383E033-DB63-4FB9-9F40-2EE41C8230CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{36289A38-F2D3-4CAC-9B28-34C57666EFA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36289A38-F2D3-4CAC-9B28-34C57666EFA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36289A38-F2D3-4CAC-9B28-34C57666EFA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5383E033-DB63-4FB9-9F40-2EE41C8230CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5383E033-DB63-4FB9-9F40-2EE41C8230CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5383E033-DB63-4FB9-9F40-2EE41C8230CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5383E033-DB63-4FB9-9F40-2EE41C8230CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

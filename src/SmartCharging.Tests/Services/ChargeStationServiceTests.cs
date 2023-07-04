@@ -468,13 +468,13 @@ public class ChargeStationServiceTests
         _chargeStationRepositoryMock = new Mock<IChargeStationRepository>();
         _chargeStationRepositoryMock
             .Setup(m => m.AddAsync(It.IsAny<ChargeStation>()))
-            .Returns(Task.CompletedTask);
+            .Returns(Task.FromResult(It.IsAny<ChargeStation>()));
         _chargeStationRepositoryMock
             .Setup(m => m.DeleteAsync(It.IsAny<string>(), It.IsAny<string>()))
             .Returns(Task.CompletedTask);
         _chargeStationRepositoryMock
             .Setup(m => m.UpdateAsync(It.IsAny<ChargeStation>()))
-            .Returns(Task.CompletedTask);
+            .Returns(Task.FromResult(It.IsAny<ChargeStation>()));
 
         if (expectedResult is not null)
         {

@@ -13,19 +13,22 @@ public abstract class Repository<TEntity>
     public Repository(DatabaseSettings databaseSettings, string containerName, string partitionKeyPath)
     {
         CosmosClient client = new(databaseSettings.AccountEndpoint, databaseSettings.AuthKey);
-        database = client.GetDatabase(databaseSettings.DatabaseId);
-        
+        var createDatabaseIfNotExist = client.CreateDatabaseIfNotExistsAsync(databaseSettings.DatabaseId);
+        createDatabaseIfNotExist.Wait();
+        database = createDatabaseIfNotExist.Result;
+
         var createContainerIfNotExist = database.CreateContainerIfNotExistsAsync(containerName, partitionKeyPath);
         createContainerIfNotExist.Wait();
+        container = createContainerIfNotExist.Result;
         
         partitionKeyPropertyName = partitionKeyPath.Replace("/", "");
-        container = createContainerIfNotExist.Result;
     }
 
-    public Task AddAsync(TEntity entity)
+    public async Task<TEntity> AddAsync(TEntity entity)
     {
         Validator.ValidateObject(entity, new ValidationContext(entity), validateAllProperties: true);
-        return container.CreateItemAsync(entity);
+        var response = await container.CreateItemAsync(entity);
+        return response.Resource;
     }
 
     public virtual async Task<TEntity> FindAsync(string id, string partitionKey)
@@ -48,10 +51,11 @@ public abstract class Repository<TEntity>
         }
     }
 
-    public Task UpdateAsync(TEntity entity)
+    public async Task<TEntity> UpdateAsync(TEntity entity)
     {
         Validator.ValidateObject(entity, new ValidationContext(entity), validateAllProperties: true);
-        return container.UpsertItemAsync(entity);
+        var response = await container.UpsertItemAsync(entity);
+        return response.Resource;
     }
 
     public Task DeleteAsync(string id, string partitionKey)

@@ -29,10 +29,19 @@ public class GroupRepository : Repository<Group>, IGroupRepository
             .ToFeedIterator();
 
         var results = new List<ChargeStation>();
-        while (iterator.HasMoreResults)
+
+        try
         {
-            var response = await iterator.ReadNextAsync();
-            results.AddRange(response.ToList());
+            while (iterator.HasMoreResults)
+            {
+                var response = await iterator.ReadNextAsync();
+                results.AddRange(response.ToList());
+            }
+        }
+        catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        { 
+            // Charge Stations Container does not exists. In which case is safe to assume there are no child stations to this group.
+            // Do nothing.
         }
 
         return results;
