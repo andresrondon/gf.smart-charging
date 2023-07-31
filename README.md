@@ -1,8 +1,9 @@
-# GreenFlux Smart Charging API
-**Assignment Version 14**
+# Electric Vehicle Charge Station Management API
 
 ## Overview
-This API exposes a simplified smart charging domain.
+An example of a RESTful API done using ASP.net Core and Azure Cosmos.
+
+This API exposes a simplified EV charge station management domain. 
 
 Domain Model:
 
