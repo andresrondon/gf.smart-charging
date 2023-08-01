@@ -30,7 +30,7 @@ public class ConnectorService : IConnectorService
 
         BusinessRules
             .ValidateConnectorUpdate(connector, parentGroup, parentStation)
-            .ThrowIfInValid();
+            .ThrowIfInvalid();
 
         await stationRepository.UpdateAsync(parentStation!);
     }
@@ -64,7 +64,7 @@ public class ConnectorService : IConnectorService
 
         BusinessRules
             .ValidateConnectorUpdate(connector, parentGroup, parentStation)
-            .ThrowIfInValid();
+            .ThrowIfInvalid();
 
         await stationRepository.UpdateAsync(parentStation!);
     }

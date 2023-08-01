@@ -72,7 +72,7 @@ internal static class BusinessRules
         /// Throws a <see cref="BusinessRulesValidationException"/> if the list contains one or more error messages.
         /// </summary>
         /// <exception cref="BusinessRulesValidationException"></exception>
-        public void ThrowIfInValid()
+        public void ThrowIfInvalid()
         {
             if (!IsValid)
             {

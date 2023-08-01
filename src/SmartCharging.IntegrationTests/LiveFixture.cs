@@ -19,7 +19,7 @@ public class LiveFixture
         serviceCollection.Configure<DatabaseSettings>(x =>
         {
             x.AccountEndpoint = "https://localhost:8081";
-            x.AuthKey = "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==";
+            x.AuthKey = "";
             x.DatabaseId = "SmartChargingDB";
         });
 

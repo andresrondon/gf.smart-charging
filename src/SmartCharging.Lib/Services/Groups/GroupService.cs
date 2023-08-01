@@ -24,7 +24,7 @@ public class GroupService : IGroupService
     {
         BusinessRules
             .ValidateGroupUpdate(group)
-            .ThrowIfInValid();
+            .ThrowIfInvalid();
 
         return groupRepository.AddAsync(group);
     }
@@ -47,7 +47,7 @@ public class GroupService : IGroupService
     {
         BusinessRules
             .ValidateGroupUpdate(group)
-            .ThrowIfInValid();
+            .ThrowIfInvalid();
 
         return groupRepository.UpdateAsync(group);
     }

@@ -26,7 +26,7 @@ public class ChargeStationService : IChargeStationService
         var group = await groupRepository.FindAsync(station.GroupId, Defaults.Location);
         BusinessRules
             .ValidateChargeStationUpdate(station, group)
-            .ThrowIfInValid();
+            .ThrowIfInvalid();
 
         // Add resource
         await stationRepository.AddAsync(station);
@@ -51,7 +51,7 @@ public class ChargeStationService : IChargeStationService
         var group = await groupRepository.FindAsync(station.GroupId, Defaults.Location);
         BusinessRules
             .ValidateChargeStationUpdate(station, group)
-            .ThrowIfInValid();
+            .ThrowIfInvalid();
         
         // Update
         await stationRepository.UpdateAsync(station);
